@@ -48,7 +48,7 @@ const sleep = (sec: number) => new Promise((resolve) => setTimeout(resolve, sec 
 
 const cli = (cmd: string) => {
   return new Promise((resolve: Function, reject: Function) => {
-    child_process.exec(`aws --region us-east-1 --endpoint http://localhost:${PORT} sqs ${cmd}`, (err, stdout, stderr) => {
+    child_process.exec(`AWS_ACCESS_KEY_ID=fake AWS_SECRET_ACCESS_KEY=fake aws --region us-east-1 --endpoint http://localhost:${PORT} sqs ${cmd}`, (err, stdout, stderr) => {
       if (err) {
         reject(err);
         return;

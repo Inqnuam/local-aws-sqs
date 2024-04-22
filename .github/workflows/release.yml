@@ -12,11 +12,6 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-east-1
-          aws-access-key-id: fake
-          aws-secret-access-key: fake
       - run: yarn install
       - run: yarn types
       - run: yarn test run
