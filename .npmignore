@@ -1,0 +1,16 @@
+.github
+.husky
+.vscode
+.gitignore
+.npmignore
+.prettierrc.json
+node_modules
+yarn-error.log
+yarn.lock
+src
+test
+build.mjs
+TODO.md
+tsconfig.json
+tsconfig.build.json
+tsconfig.test.json

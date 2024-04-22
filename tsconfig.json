@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "target": "es2022",
+    "module": "ES2022",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
+    "moduleResolution": "Bundler",
+    "removeComments": false,
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "declarationDir": "./dist/",
+    "rootDir": "./src/"
+  },
+  "exclude": ["./dist/**/*", "./test/**/*"]
+}

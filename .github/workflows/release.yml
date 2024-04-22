@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+jobs:
+  generate:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: fake
+          aws-secret-access-key: fake
+      - run: yarn install
+      - run: yarn types
+      - run: yarn test run
+      - run: yarn build
+      # - run: yarn publish
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
