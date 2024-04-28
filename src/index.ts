@@ -21,3 +21,4 @@ export const createSqsServer = (options: ISqsServerOptions): Promise<Server> => 
 };
 
 export { createRequestHandler };
+export { type ISqsServerOptions };

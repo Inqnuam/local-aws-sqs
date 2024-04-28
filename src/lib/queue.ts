@@ -764,10 +764,15 @@ export class Queue implements IQueueConfig {
       MaximumMessageSize: String(this.MaximumMessageSize),
       MessageRetentionPeriod: String(this.MessageRetentionPeriod),
       DelaySeconds: String(this.DelaySeconds),
-      Policy: this.#getPolicy(),
       ReceiveMessageWaitTimeSeconds: String(this.ReceiveMessageWaitTimeSeconds),
       SqsManagedSseEnabled: String(this.SqsManagedSseEnabled),
     };
+
+    const Policy = this.#getPolicy();
+
+    if (Policy) {
+      attr.Policy = Policy;
+    }
 
     if (this.KmsMasterKeyId) {
       attr.KmsMasterKeyId = this.KmsMasterKeyId;
