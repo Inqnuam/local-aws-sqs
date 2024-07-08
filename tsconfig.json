@@ -12,7 +12,8 @@
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "declarationDir": "./dist/",
-    "rootDir": "./src/"
+    "rootDir": "./src/",
+    "skipLibCheck": true
   },
   "exclude": ["./dist/**/*", "./test/**/*"]
 }

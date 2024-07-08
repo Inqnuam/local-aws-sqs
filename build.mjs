@@ -9,7 +9,8 @@ const options = {
   target: "ES6",
   dropLabels: DEV ? undefined : ["DEV"],
   bundle: true,
-  minify: true,
+  minify: !DEV,
+  sourcemap: DEV,
   external: ["aws-query-decoder", "aws-md5-of-message-attributes"],
 };
 

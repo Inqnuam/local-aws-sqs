@@ -35,7 +35,7 @@ export const parseSqsHttpRequest = async (req: IncomingMessage) => {
 
   const rawBody: string = await new Promise((resolve) => {
     req.on("end", async () => {
-      resolve(data.toString());
+      resolve(data?.toString());
     });
   });
 
@@ -45,7 +45,7 @@ export const parseSqsHttpRequest = async (req: IncomingMessage) => {
     try {
       body = JSON.parse(rawBody);
     } catch (error) {}
-  } else {
+  } else if (rawBody) {
     body = decode(rawBody);
 
     Action = body.Action;
