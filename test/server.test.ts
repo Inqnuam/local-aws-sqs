@@ -75,63 +75,63 @@ describe("SQS API", () => {
 
   describe("Create Queue", () => {
     describe("Should fail", () => {
-      it("with missing QueueName", () => {
-        expect(async () => {
+      it("with missing QueueName", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new CreateQueueCommand({}));
         }).rejects.toThrow("Value for parameter QueueName is invalid. Reason: Must specify a queue name.");
       });
 
-      it("with empty QueueName", () => {
-        expect(async () => {
+      it("with empty QueueName", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "" }));
         }).rejects.toThrow("Queue name cannot be empty");
       });
 
-      it("with invalid Standart Queue name", () => {
-        expect(async () => {
+      it("with invalid Standart Queue name", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "example.fifo" }));
         }).rejects.toThrow("Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
       });
 
-      it("with invalid Standart Queue Attribute (FifoQueue)", () => {
-        expect(async () => {
+      it("with invalid Standart Queue Attribute (FifoQueue)", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "example", Attributes: { FifoQueue: "true" } }));
         }).rejects.toThrow("Unknown Attribute FifoQueue.");
       });
 
-      it("with invalid FIFO Queue name", () => {
-        expect(async () => {
+      it("with invalid FIFO Queue name", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "example.ifo", Attributes: { FifoQueue: "true" } }));
         }).rejects.toThrow("Unknown Attribute FifoQueue.");
       });
 
-      it("with invalid FIFO Queue Attribute", () => {
-        expect(async () => {
+      it("with invalid FIFO Queue Attribute", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "example.fifo", Attributes: { FifoQueue: "false" } }));
         }).rejects.toThrow("Unknown Attribute FifoQueue.");
       });
 
-      it("with invalid name", () => {
-        expect(async () => {
+      it("with invalid name", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "in.fo" }));
         }).rejects.toThrow("Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
 
-        expect(async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "ééwwà)" }));
         }).rejects.toThrow("Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
       });
 
       describe("with invalid Attributes type", () => {
-        it("as array", () => {
-          expect(async () => {
+        it("as array", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new CreateQueueCommand({ QueueName: "InvalidAttrib", Attributes: ["dummy"] }));
           }).rejects.toThrow("Unknown Attribute 0.");
         });
 
-        it("as string", () => {
-          expect(async () => {
+        it("as string", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new CreateQueueCommand({ QueueName: "InvalidAttrib", Attributes: "dummy" }));
           }).rejects.toThrow("Unknown Attribute 0.");
@@ -158,52 +158,52 @@ describe("SQS API", () => {
     describe("with custom Attributes", () => {
       describe("DelaySeconds", () => {
         describe("Should fail", () => {
-          it("with object", () => {
-            expect(async () => {
+          it("with object", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected.");
           });
 
-          it("with array", () => {
-            expect(async () => {
+          it("with array", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
 
-          it("with boolean", () => {
-            expect(async () => {
+          it("with boolean", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: true } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
-          it("with empty", () => {
-            expect(async () => {
+          it("with empty", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: "" } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
 
-          it("with empty char and number", () => {
-            expect(async () => {
+          it("with empty char and number", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: " 6" } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
 
-          it("with signed int", () => {
-            expect(async () => {
+          it("with signed int", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: "-45" } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
 
-          it("with above max allowed value", () => {
-            expect(async () => {
+          it("with above max allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: "901" } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
 
-          it("with float", () => {
-            expect(async () => {
+          it("with float", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { DelaySeconds: "544.43" } }));
             }).rejects.toThrow("Invalid value for the parameter DelaySeconds.");
           });
@@ -255,52 +255,52 @@ describe("SQS API", () => {
 
       describe("MaximumMessageSize", () => {
         describe("Should fail", () => {
-          it("with object", () => {
-            expect(async () => {
+          it("with object", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected.");
           });
 
-          it("with array", () => {
-            expect(async () => {
+          it("with array", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
 
-          it("with boolean", () => {
-            expect(async () => {
+          it("with boolean", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: true } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
-          it("with empty", () => {
-            expect(async () => {
+          it("with empty", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "" } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
 
-          it("with empty char and number", () => {
-            expect(async () => {
+          it("with empty char and number", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: " 2000" } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
 
-          it("with below min allowed value", () => {
-            expect(async () => {
+          it("with below min allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "1000" } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
 
-          it("with above max allowed value", () => {
-            expect(async () => {
+          it("with above max allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "262145" } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
 
-          it("with float", () => {
-            expect(async () => {
+          it("with float", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "2000.43" } }));
             }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
           });
@@ -337,52 +337,52 @@ describe("SQS API", () => {
 
       describe("MessageRetentionPeriod", () => {
         describe("Should fail", () => {
-          it("with object", () => {
-            expect(async () => {
+          it("with object", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected.");
           });
 
-          it("with array", () => {
-            expect(async () => {
+          it("with array", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
 
-          it("with boolean", () => {
-            expect(async () => {
+          it("with boolean", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: true } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
-          it("with empty", () => {
-            expect(async () => {
+          it("with empty", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: "" } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
 
-          it("with empty char and number", () => {
-            expect(async () => {
+          it("with empty char and number", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: " 2000" } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
 
-          it("with below min allowed value", () => {
-            expect(async () => {
+          it("with below min allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: "50" } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
 
-          it("with above max allowed value", () => {
-            expect(async () => {
+          it("with above max allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: "1209601" } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
 
-          it("with float", () => {
-            expect(async () => {
+          it("with float", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MessageRetentionPeriod: "65.2" } }));
             }).rejects.toThrow("Invalid value for the parameter MessageRetentionPeriod.");
           });
@@ -431,73 +431,73 @@ describe("SQS API", () => {
         describe("Should fail", () => {
           const QueueName = "FailQueuePolicy";
 
-          it("with no JSON parsable string", () => {
-            expect(async () => {
+          it("with no JSON parsable string", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: "badjson" } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with invalid JSON Policy type (array)", () => {
-            expect(async () => {
+          it("with invalid JSON Policy type (array)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify([]) } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with invalid JSON Policy type (string)", () => {
-            expect(async () => {
+          it("with invalid JSON Policy type (string)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify("string") } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with invalid JSON Policy type (number)", () => {
-            expect(async () => {
+          it("with invalid JSON Policy type (number)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify(533) } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
-          it("with invalid JSON Policy type (null)", () => {
-            expect(async () => {
+          it("with invalid JSON Policy type (null)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify(null) } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with unknown Policy field", () => {
-            expect(async () => {
+          it("with unknown Policy field", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify({ Dummyfield: "dummyvalue", Version: "2012-10-17", Statement: [Statement] }) } })
               );
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with invalid Policy Version", () => {
-            expect(async () => {
+          it("with invalid Policy Version", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify({ Version: "4532-10-17", Statement: [Statement] }) } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with empty Policy Statement", () => {
-            expect(async () => {
+          it("with empty Policy Statement", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify({ Version: "2012-10-17", Statement: [] }) } }));
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with unknown Policy Statement (object) field", () => {
-            expect(async () => {
+          it("with unknown Policy Statement (object) field", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify({ Version: "2012-10-17", Statement: { ...Statement, dummy: "value" } }) } })
               );
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with unknown Policy Statement (array) field", () => {
-            expect(async () => {
+          it("with unknown Policy Statement (array) field", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({ QueueName, Attributes: { Policy: JSON.stringify({ Version: "2012-10-17", Statement: [{ ...Statement, dummy: "value" }] }) } })
               );
             }).rejects.toThrow("Invalid value for the parameter Policy.");
           });
 
-          it("with invalid Policy Statement length", () => {
-            expect(async () => {
+          it("with invalid Policy Statement length", async () => {
+            await expect(async () => {
               const Policy = JSON.stringify({
                 Version: "2012-10-17",
                 Statement: Array(22)
@@ -581,46 +581,46 @@ describe("SQS API", () => {
 
       describe("ReceiveMessageWaitTimeSeconds", () => {
         describe("Should fail", () => {
-          it("with object", () => {
-            expect(async () => {
+          it("with object", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected.");
           });
 
-          it("with array", () => {
-            expect(async () => {
+          it("with array", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
 
-          it("with boolean", () => {
-            expect(async () => {
+          it("with boolean", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: true } }));
             }).rejects.toThrow("Invalid value for the parameter ReceiveMessageWaitTimeSeconds.");
           });
-          it("with empty", () => {
-            expect(async () => {
+          it("with empty", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: "" } }));
             }).rejects.toThrow("Invalid value for the parameter ReceiveMessageWaitTimeSeconds.");
           });
 
-          it("with empty char and number", () => {
-            expect(async () => {
+          it("with empty char and number", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: " 2" } }));
             }).rejects.toThrow("Invalid value for the parameter ReceiveMessageWaitTimeSeconds.");
           });
 
-          it("with below min allowed value", () => {
-            expect(async () => {
+          it("with below min allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: "-50" } }));
             }).rejects.toThrow("Invalid value for the parameter ReceiveMessageWaitTimeSeconds.");
           });
 
-          it("with above max allowed value", () => {
-            expect(async () => {
+          it("with above max allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { ReceiveMessageWaitTimeSeconds: "21" } }));
             }).rejects.toThrow("Invalid value for the parameter ReceiveMessageWaitTimeSeconds.");
           });
@@ -657,46 +657,46 @@ describe("SQS API", () => {
 
       describe("VisibilityTimeout", () => {
         describe("Should fail", () => {
-          it("with object", () => {
-            expect(async () => {
+          it("with object", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected.");
           });
 
-          it("with array", () => {
-            expect(async () => {
+          it("with array", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
 
-          it("with boolean", () => {
-            expect(async () => {
+          it("with boolean", async () => {
+            await expect(async () => {
               //@ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: true } }));
             }).rejects.toThrow("Invalid value for the parameter VisibilityTimeout.");
           });
-          it("with empty", () => {
-            expect(async () => {
+          it("with empty", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: "" } }));
             }).rejects.toThrow("Invalid value for the parameter VisibilityTimeout.");
           });
 
-          it("with empty char and number", () => {
-            expect(async () => {
+          it("with empty char and number", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: " 2" } }));
             }).rejects.toThrow("Invalid value for the parameter VisibilityTimeout.");
           });
 
-          it("with below min allowed value", () => {
-            expect(async () => {
+          it("with below min allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: "-50" } }));
             }).rejects.toThrow("Invalid value for the parameter VisibilityTimeout.");
           });
 
-          it("with above max allowed value", () => {
-            expect(async () => {
+          it("with above max allowed value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { VisibilityTimeout: "43201" } }));
             }).rejects.toThrow("Invalid value for the parameter VisibilityTimeout.");
           });
@@ -735,40 +735,40 @@ describe("SQS API", () => {
         describe("Should fail", () => {
           const InvalidAttribQueueName = "InvalidAttribQueueName";
 
-          it("with invalid JSON value", () => {
-            expect(async () => {
+          it("with invalid JSON value", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: InvalidAttribQueueName, Attributes: { RedrivePolicy: " " } }));
             }).rejects.toThrow("Invalid value for the parameter RedrivePolicy. Reason: Redrive policy is not a valid JSON map.");
           });
-          it("with invalid JSON value (number)", () => {
-            expect(async () => {
+          it("with invalid JSON value (number)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: InvalidAttribQueueName, Attributes: { RedrivePolicy: 4 } }));
             }).rejects.toThrow("Invalid value for the parameter RedrivePolicy. Reason: Redrive policy is not a valid JSON map.");
           });
-          it("with invalid JSON value (array)", () => {
-            expect(async () => {
+          it("with invalid JSON value (array)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: InvalidAttribQueueName, Attributes: { RedrivePolicy: [] } }));
             }).rejects.toThrow("Invalid value for the parameter RedrivePolicy. Reason: Redrive policy is not a valid JSON map.");
           });
 
-          it("with missing maxReceiveCount", () => {
-            expect(async () => {
+          it("with missing maxReceiveCount", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: InvalidAttribQueueName, Attributes: { RedrivePolicy: JSON.stringify({}) } }));
             }).rejects.toThrow("Value {} for parameter RedrivePolicy is invalid. Reason: Redrive policy does not contain mandatory attribute: maxReceiveCount.");
           });
 
-          it("with missing deadLetterTargetArn", () => {
-            expect(async () => {
+          it("with missing deadLetterTargetArn", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: InvalidAttribQueueName, Attributes: { RedrivePolicy: JSON.stringify({ maxReceiveCount: 5 }) } }));
             }).rejects.toThrow(
               'Value {"maxReceiveCount":5} for parameter RedrivePolicy is invalid. Reason: Redrive policy does not contain mandatory attribute: deadLetterTargetArn.'
             );
           });
 
-          it("with invalid maxReceiveCount (-)", () => {
-            expect(async () => {
+          it("with invalid maxReceiveCount (-)", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: InvalidAttribQueueName,
@@ -780,8 +780,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with invalid maxReceiveCount (+)", () => {
-            expect(async () => {
+          it("with invalid maxReceiveCount (+)", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: InvalidAttribQueueName,
@@ -793,8 +793,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with invalid deadLetterTargetArn", () => {
-            expect(async () => {
+          it("with invalid deadLetterTargetArn", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: InvalidAttribQueueName,
@@ -806,8 +806,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with invalid deadLetterTargetArn Queue type", () => {
-            expect(async () => {
+          it("with invalid deadLetterTargetArn Queue type", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: InvalidAttribQueueName,
@@ -819,8 +819,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with inexisting deadLetterTargetArn Queue", () => {
-            expect(async () => {
+          it("with inexisting deadLetterTargetArn Queue", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: InvalidAttribQueueName,
@@ -832,8 +832,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with unexcpected parameters", () => {
-            expect(async () => {
+          it("with unexcpected parameters", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: "MyAwsomeDlq" }));
               await client.send(
                 new CreateQueueCommand({
@@ -885,74 +885,74 @@ describe("SQS API", () => {
       describe("RedriveAllowPolicy", () => {
         describe("Should fail", () => {
           const QueueUrl = "QueueFailRedriveAllowPolicy";
-          it("with invalid type (array)", () => {
-            expect(async () => {
+          it("with invalid type (array)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: [] } }));
             }).rejects.toThrow("Unrecognized collection type class java.lang.String");
           });
-          it("with invalid type (object)", () => {
-            expect(async () => {
+          it("with invalid type (object)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: {} } }));
             }).rejects.toThrow("Start of structure or map found where not expected");
           });
 
-          it("with invalid type (number)", () => {
-            expect(async () => {
+          it("with invalid type (number)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: 444 } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
-          it("with invalid type (boolean)", () => {
-            expect(async () => {
+          it("with invalid type (boolean)", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: false } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("with invalid type (string)", () => {
-            expect(async () => {
+          it("with invalid type (string)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: "badjson" } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("with invalid JSON type (array)", () => {
-            expect(async () => {
+          it("with invalid JSON type (array)", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: JSON.stringify([]) } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("without redrivePermission", () => {
-            expect(async () => {
+          it("without redrivePermission", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: JSON.stringify({}) } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("with invalid redrivePermission", () => {
-            expect(async () => {
+          it("with invalid redrivePermission", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: JSON.stringify({ redrivePermission: "dummy" }) } }));
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("with unknown field", () => {
-            expect(async () => {
+          it("with unknown field", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: JSON.stringify({ redrivePermission: "allowAll", dummy: "value" }) } })
               );
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("without sourceQueueArns", () => {
-            expect(async () => {
+          it("without sourceQueueArns", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { RedriveAllowPolicy: JSON.stringify({ redrivePermission: "byQueue" }) } }));
             }).rejects.toThrow(
               `Value {"redrivePermission":"byQueue"} for parameter RedriveAllowPolicy is invalid. Reason: Amazon SQS can't create the redrive allow policy. When you specify the byQueue permission type, you must also specify one or more sourceQueueArns values.`
             );
           });
 
-          it("with invalid sourceQueueArns (string)", () => {
-            expect(async () => {
+          it("with invalid sourceQueueArns (string)", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -962,8 +962,8 @@ describe("SQS API", () => {
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("without sourceQueueArns (array-anything-but-string)", () => {
-            expect(async () => {
+          it("without sourceQueueArns (array-anything-but-string)", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -973,8 +973,8 @@ describe("SQS API", () => {
             }).rejects.toThrow("Invalid value for the parameter RedriveAllowPolicy. Reason: Amazon SQS can't create the redrive allow policy, as it’s in an unsupported format.");
           });
 
-          it("with empty sourceQueueArns", () => {
-            expect(async () => {
+          it("with empty sourceQueueArns", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -1002,8 +1002,8 @@ describe("SQS API", () => {
               "arn:aws:sqs:us-east-1:123456789012:x11",
             ],
           });
-          it("with too much sourceQueueArns", () => {
-            expect(async () => {
+          it("with too much sourceQueueArns", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -1015,8 +1015,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with bad redrivePermission (allowAll) + sourceQueueArns couple", () => {
-            expect(async () => {
+          it("with bad redrivePermission (allowAll) + sourceQueueArns couple", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -1028,8 +1028,8 @@ describe("SQS API", () => {
             );
           });
 
-          it("with bad redrivePermission (denyAll) + sourceQueueArns couple", () => {
-            expect(async () => {
+          it("with bad redrivePermission (denyAll) + sourceQueueArns couple", async () => {
+            await expect(async () => {
               await client.send(
                 new CreateQueueCommand({
                   QueueName: QueueUrl,
@@ -1084,21 +1084,21 @@ describe("SQS API", () => {
       describe("KmsMasterKeyId", () => {
         describe("Should fail", () => {
           const QueueName = "FailQueueKmsMasterKeyId";
-          it("with invalid KmsDataKeyReusePeriodSeconds", () => {
-            expect(async () => {
+          it("with invalid KmsDataKeyReusePeriodSeconds", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { KmsDataKeyReusePeriodSeconds: "-233" } }));
             }).rejects.toThrow("Invalid value for the parameter KmsDataKeyReusePeriodSeconds.");
           });
 
-          it("with invalid KmsDataKeyReusePeriodSeconds", () => {
-            expect(async () => {
+          it("with invalid KmsDataKeyReusePeriodSeconds", async () => {
+            await expect(async () => {
               // @ts-expect-error
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { KmsDataKeyReusePeriodSeconds: 86405 } }));
             }).rejects.toThrow("Invalid value for the parameter KmsDataKeyReusePeriodSeconds.");
           });
 
-          it("with invalid SqsManagedSseEnabled + KmsMasterKeyId", () => {
-            expect(async () => {
+          it("with invalid SqsManagedSseEnabled + KmsMasterKeyId", async () => {
+            await expect(async () => {
               await client.send(new CreateQueueCommand({ QueueName, Attributes: { SqsManagedSseEnabled: "true", KmsMasterKeyId: "alias/aws/sqs" } }));
             }).rejects.toThrow("You can use one type of server-side encryption (SSE) at one time. You can either enable KMS SSE or SQS SSE.");
           });
@@ -1148,15 +1148,15 @@ describe("SQS API", () => {
   });
 
   describe("Get Queue Url", () => {
-    it("should fail to with empty queue name", () => {
-      expect(async () => {
+    it("should fail to with empty queue name", async () => {
+      await expect(async () => {
         const cmd = new GetQueueUrlCommand({ QueueName: "" });
         await client.send(cmd);
       }).rejects.toThrow("Value for parameter QueueName is invalid. Reason: Must specify a queue name.");
     });
 
-    it("should fail to with invalid queue name", () => {
-      expect(async () => {
+    it("should fail to with invalid queue name", async () => {
+      await expect(async () => {
         const cmd = new GetQueueUrlCommand({ QueueName: "InvalidName" });
         await client.send(cmd);
       }).rejects.toThrow("The specified queue does not exist.");
@@ -1215,8 +1215,8 @@ describe("SQS API", () => {
       await client.send(new PurgeQueueCommand({ QueueUrl: StandartQueueName }));
     });
 
-    it("Should fail to purge already purged queue", () => {
-      expect(async () => {
+    it("Should fail to purge already purged queue", async () => {
+      await expect(async () => {
         await client.send(new PurgeQueueCommand({ QueueUrl: StandartQueueName }));
       }).rejects.toThrow(`Only one PurgeQueue operation on ${StandartQueueName} is allowed every 60 seconds.`);
     });
@@ -1225,78 +1225,78 @@ describe("SQS API", () => {
   describe("Send Message", () => {
     describe("Standart Queue", () => {
       describe("Should fail", () => {
-        it("without MessageBody", () => {
-          expect(async () => {
+        it("without MessageBody", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName }));
           }).rejects.toThrow("The request must contain the parameter MessageBody.");
         });
 
-        it("with empty MessageBody", () => {
-          expect(async () => {
+        it("with empty MessageBody", async () => {
+          await expect(async () => {
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "" }));
           }).rejects.toThrow("The request must contain the parameter MessageBody.");
         });
 
-        it("with invalid MessageBody", () => {
-          expect(async () => {
+        it("with invalid MessageBody", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: {} }));
           }).rejects.toThrow("Start of structure or map found where not expected.");
         });
 
-        it("with invalid DelaySeconds (NaN)", () => {
-          expect(async () => {
+        it("with invalid DelaySeconds (NaN)", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", DelaySeconds: "invalid" }));
           }).rejects.toThrow("STRING_VALUE can not be converted to an Integer");
         });
 
-        it("with invalid DelaySeconds (invalid integer range)", () => {
-          expect(async () => {
+        it("with invalid DelaySeconds (invalid integer range)", async () => {
+          await expect(async () => {
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", DelaySeconds: -234 }));
           }).rejects.toThrow("Value -234 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
 
-          expect(async () => {
+          await expect(async () => {
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", DelaySeconds: 1000 }));
           }).rejects.toThrow("Value 1000 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
         });
 
-        it("with invalid attributes", () => {
-          expect(async () => {
+        it("with invalid attributes", async () => {
+          await expect(async () => {
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageGroupId: "23432" }));
           }).rejects.toThrow("The request include parameter MessageGroupId which is not valid for this queue type");
 
-          expect(async () => {
+          await expect(async () => {
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageDeduplicationId: "1000" }));
           }).rejects.toThrow("The request include parameter MessageDeduplicationId which is not valid for this queue type");
         });
 
-        it("with invalid MessageAttributes", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageAttributes: { Hello: { DataType: "Number", StringValue: "world" } } })
             );
           }).rejects.toThrow("Can't cast the value of message (user) attribute 'Hello' to a number.");
 
-          expect(async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageAttributes: { Hello: { DataType: "String", StringValue: "" } } })
             );
           }).rejects.toThrow("Message (user) attribute 'Hello' must contain a non-empty value of type 'String'.");
 
-          expect(async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageAttributes: { "": { DataType: "String", StringValue: "some value" } } })
             );
           }).rejects.toThrow("The request must contain non-empty message (user) attribute names.");
 
-          expect(async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageAttributes: { Hello: {} } }));
           }).rejects.toThrow("The message (user) attribute 'Hello' must contain a non-empty message attribute value.");
 
-          expect(async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1307,8 +1307,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("The type of message (user) attribute 'Hello' is invalid. You must use only the following supported type prefixes: Binary, Number, String.");
         });
 
-        it("with invalid MessageAttributes", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes", async () => {
+          await expect(async () => {
             await client.send(
               // @ts-expect-error
               new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageSystemAttributes: { Hello: { StringValue: "World", DataType: "String" } } })
@@ -1316,8 +1316,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("Message system attribute name 'Hello' is invalid.");
         });
 
-        it("with invalid MessageAttributes data type (String List)", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes data type (String List)", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1333,8 +1333,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("Message attribute list values in SendMessage operation are not supported.");
         });
 
-        it("with invalid MessageAttributes data type (Binary List)", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes data type (Binary List)", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1350,8 +1350,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("Message attribute list values in SendMessage operation are not supported.");
         });
 
-        it("with reserved MessageAttributes name (AWS.)", () => {
-          expect(async () => {
+        it("with reserved MessageAttributes name (AWS.)", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1367,8 +1367,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("You can't use message attribute names beginning with 'AWS.' or 'Amazon'. These strings are reserved for internal use.");
         });
 
-        it("with reserved MessageAttributes name (amazon.)", () => {
-          expect(async () => {
+        it("with reserved MessageAttributes name (amazon.)", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1384,8 +1384,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("You can't use message attribute names beginning with 'AWS.' or 'Amazon'. These strings are reserved for internal use.");
         });
 
-        it("with invalid MessageAttributes enteries length", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes enteries length", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1408,8 +1408,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("Number of message attributes [11] exceeds the allowed maximum [10].");
         });
 
-        it("with invalid MessageAttributes entry name length", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes entry name length", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1422,8 +1422,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("Message (user) attribute name must be shorter than 256 bytes.");
         });
 
-        it("with invalid MessageAttributes entry type length", () => {
-          expect(async () => {
+        it("with invalid MessageAttributes entry type length", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: StandartQueueName,
@@ -1443,8 +1443,8 @@ describe("SQS API", () => {
             await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { MaximumMessageSize: String(MaximumMessageSize) } }));
           });
 
-          it("MessageBody", () => {
-            expect(async () => {
+          it("MessageBody", async () => {
+            await expect(async () => {
               await client.send(
                 new SendMessageCommand({
                   QueueUrl,
@@ -1456,8 +1456,8 @@ describe("SQS API", () => {
             }).rejects.toThrow(`One or more parameters are invalid. Reason: Message must be shorter than ${MaximumMessageSize} bytes.`);
           });
 
-          it("MessageAttributes", () => {
-            expect(async () => {
+          it("MessageAttributes", async () => {
+            await expect(async () => {
               await client.send(
                 new SendMessageCommand({
                   QueueUrl,
@@ -1475,8 +1475,8 @@ describe("SQS API", () => {
             }).rejects.toThrow(`One or more parameters are invalid. Reason: Message must be shorter than ${MaximumMessageSize} bytes.`);
           });
 
-          it("MessageBody + MessageAttributes", () => {
-            expect(async () => {
+          it("MessageBody + MessageAttributes", async () => {
+            await expect(async () => {
               await client.send(
                 new SendMessageCommand({
                   QueueUrl,
@@ -1616,8 +1616,8 @@ describe("SQS API", () => {
 
     describe("FIFO Queue", () => {
       describe("Should fail", () => {
-        it("without MessageDeduplicationId", () => {
-          expect(async () => {
+        it("without MessageDeduplicationId", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: FifoQueueName,
@@ -1628,8 +1628,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("The queue should either have ContentBasedDeduplication enabled or MessageDeduplicationId provided explicitly");
         });
 
-        it("without MessageGroupId", () => {
-          expect(async () => {
+        it("without MessageGroupId", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: FifoQueueName,
@@ -1640,8 +1640,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("The request must contain the parameter MessageGroupId.");
         });
 
-        it("with invalid DelaySeconds (NaN)", () => {
-          expect(async () => {
+        it("with invalid DelaySeconds (NaN)", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({
                 QueueUrl: FifoQueueName,
@@ -1655,8 +1655,8 @@ describe("SQS API", () => {
           }).rejects.toThrow("STRING_VALUE can not be converted to an Integer");
         });
 
-        it("with invalid FIFO Queue attribtue DelaySeconds", () => {
-          expect(async () => {
+        it("with invalid FIFO Queue attribtue DelaySeconds", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageCommand({ QueueUrl: FifoQueueName, MessageBody: "Test message", MessageDeduplicationId: randomUUID(), MessageGroupId: randomUUID(), DelaySeconds: 60 })
             );
@@ -1697,8 +1697,8 @@ describe("SQS API", () => {
 
   describe("Receive Message", () => {
     describe("Should fail", () => {
-      it("with invalid MaxNumberOfMessages", () => {
-        expect(async () => {
+      it("with invalid MaxNumberOfMessages", async () => {
+        await expect(async () => {
           await client.send(
             new ReceiveMessageCommand({
               QueueUrl: StandartQueueName,
@@ -1708,8 +1708,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Value 50 for parameter MaxNumberOfMessages is invalid. Reason: Must be between 1 and 10, if provided.");
       });
 
-      it("with invalid WaitTimeSeconds", () => {
-        expect(async () => {
+      it("with invalid WaitTimeSeconds", async () => {
+        await expect(async () => {
           await client.send(
             new ReceiveMessageCommand({
               QueueUrl: StandartQueueName,
@@ -1719,8 +1719,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Value 50 for parameter WaitTimeSeconds is invalid. Reason: Must be >= 0 and <= 20, if provided.");
       });
 
-      it("with invalid VisibilityTimeout", () => {
-        expect(async () => {
+      it("with invalid VisibilityTimeout", async () => {
+        await expect(async () => {
           await client.send(
             new ReceiveMessageCommand({
               QueueUrl: StandartQueueName,
@@ -1900,8 +1900,8 @@ describe("SQS API", () => {
       expect(res2.$metadata.httpStatusCode).toBe(200);
     });
 
-    it("Should fail to delete with invalid ReceiptHandle", () => {
-      expect(async () => {
+    it("Should fail to delete with invalid ReceiptHandle", async () => {
+      await expect(async () => {
         await client.send(new DeleteMessageCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "invalid-receipt-id" }));
       }).rejects.toThrow('The input receipt handle "invalid-receipt-id" is not valid.');
     });
@@ -1925,7 +1925,7 @@ describe("SQS API", () => {
       it("[FIFO] should fail to delete visible message", async () => {
         const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl, VisibilityTimeout: 0 }));
         const [msg] = Messages!;
-        expect(async () => {
+        await expect(async () => {
           await client.send(new DeleteMessageCommand({ QueueUrl, ReceiptHandle: msg.ReceiptHandle }));
         }).rejects.toThrow(`Value ${msg.ReceiptHandle} for parameter ReceiptHandle is invalid. Reason: The receipt handle has expired.`);
       });
@@ -1934,35 +1934,35 @@ describe("SQS API", () => {
 
   describe("Delete Message Batch", () => {
     describe("Should fail", () => {
-      it("without Entries", () => {
-        expect(async () => {
+      it("without Entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new DeleteMessageBatchCommand({ QueueUrl: StandartQueueName }));
         }).rejects.toThrow("The request must contain the parameter Entries.");
       });
 
-      it("with empty Entries", () => {
-        expect(async () => {
+      it("with empty Entries", async () => {
+        await expect(async () => {
           await client.send(new DeleteMessageBatchCommand({ QueueUrl: StandartQueueName, Entries: [] }));
         }).rejects.toThrow("There should be at least one DeleteMessageBatchRequestEntry in the request.");
       });
 
-      it("with too much entries", () => {
-        expect(async () => {
+      it("with too much entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new DeleteMessageBatchCommand({ QueueUrl: StandartQueueName, Entries: [7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6] }));
         }).rejects.toThrow("Maximum number of entries per request are 10. You have sent 11.");
       });
 
-      it("without Entry id", () => {
-        expect(async () => {
+      it("without Entry id", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new DeleteMessageBatchCommand({ QueueUrl: StandartQueueName, Entries: [{ Id: "id-1", ReceiptHandle: "dummy" }, { ReceiptHandle: "dummy2" }] }));
         }).rejects.toThrow("The request must contain the parameter DeleteMessageBatchRequestEntry.2.Id.");
       });
 
-      it("with empty Entry id", () => {
-        expect(async () => {
+      it("with empty Entry id", async () => {
+        await expect(async () => {
           await client.send(
             new DeleteMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -1975,9 +1975,9 @@ describe("SQS API", () => {
         }).rejects.toThrow("A batch entry id can only contain alphanumeric characters, hyphens and underscores. It can be at most 80 letters long.");
       });
 
-      it("with duplicated Entry ids", () => {
+      it("with duplicated Entry ids", async () => {
         const Id = "id-1";
-        expect(async () => {
+        await expect(async () => {
           await client.send(
             new DeleteMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2164,7 +2164,7 @@ describe("SQS API", () => {
       const res = await client.send(new DeleteQueueCommand({ QueueUrl: QueueName }));
       expect(res.$metadata.httpStatusCode).toBe(200);
 
-      expect(async () => {
+      await expect(async () => {
         await client.send(new CreateQueueCommand({ QueueName }));
       }).rejects.toThrow("You must wait 60 seconds after deleting a queue before you can create another with the same name.");
     });
@@ -2172,27 +2172,27 @@ describe("SQS API", () => {
 
   describe("Send Message Batch", () => {
     describe("Should fail", () => {
-      it("without Entries", () => {
-        expect(async () => {
+      it("without Entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new SendMessageBatchCommand({ QueueUrl: StandartQueueName }));
         }).rejects.toThrow("The request must contain the parameter Entries.");
       });
-      it("with empty entries", () => {
-        expect(async () => {
+      it("with empty entries", async () => {
+        await expect(async () => {
           await client.send(new SendMessageBatchCommand({ QueueUrl: StandartQueueName, Entries: [] }));
         }).rejects.toThrow("There should be at least one SendMessageBatchRequestEntry in the request.");
       });
 
-      it("with too much entries", () => {
-        expect(async () => {
+      it("with too much entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new SendMessageBatchCommand({ QueueUrl: StandartQueueName, Entries: [7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6] }));
         }).rejects.toThrow("Maximum number of entries per request are 10. You have sent 11.");
       });
 
-      it("without entry id", () => {
-        expect(async () => {
+      it("without entry id", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2215,8 +2215,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The request must contain the parameter SendMessageBatchRequestEntry.2.Id.");
       });
 
-      it("with invalid entry id", () => {
-        expect(async () => {
+      it("with invalid entry id", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2231,9 +2231,9 @@ describe("SQS API", () => {
         }).rejects.toThrow("A batch entry id can only contain alphanumeric characters, hyphens and underscores. It can be at most 80 letters long.");
       });
 
-      it("with duplicated entry ids", () => {
+      it("with duplicated entry ids", async () => {
         const Id = "some-id";
-        expect(async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2298,8 +2298,8 @@ describe("SQS API", () => {
         ]);
       });
 
-      it("[Standart Queue] with invalid MessageBody", () => {
-        expect(async () => {
+      it("[Standart Queue] with invalid MessageBody", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2315,8 +2315,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("[Standart Queue] with invalid DelaySeconds (object)", () => {
-        expect(async () => {
+      it("[Standart Queue] with invalid DelaySeconds (object)", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2333,8 +2333,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("[Standart Queue] with invalid DelaySeconds (object)", () => {
-        expect(async () => {
+      it("[Standart Queue] with invalid DelaySeconds (object)", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2351,8 +2351,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of list found where not expected");
       });
 
-      it("[Standart Queue] with invalid DelaySeconds (object)", () => {
-        expect(async () => {
+      it("[Standart Queue] with invalid DelaySeconds (object)", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2369,8 +2369,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("[Standart Queue] with invalid MessageAttributes - StringValue (object)", () => {
-        expect(async () => {
+      it("[Standart Queue] with invalid MessageAttributes - StringValue (object)", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: StandartQueueName,
@@ -2440,8 +2440,8 @@ describe("SQS API", () => {
         ]);
       });
 
-      it("[FIFO Queue] without MessageBody", () => {
-        expect(async () => {
+      it("[FIFO Queue] without MessageBody", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: FifoQueueName,
@@ -2456,8 +2456,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The request must contain the parameter SendMessageBatchRequestEntry.1.MessageBody.");
       });
 
-      it("[FIFO Queue] with empty MessageBody", () => {
-        expect(async () => {
+      it("[FIFO Queue] with empty MessageBody", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: FifoQueueName,
@@ -2472,8 +2472,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The request must contain the parameter SendMessageBatchRequestEntry.1.MessageBody.");
       });
 
-      it("[FIFO Queue] without MessageGroupId", () => {
-        expect(async () => {
+      it("[FIFO Queue] without MessageGroupId", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: FifoQueueName,
@@ -2488,8 +2488,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The request must contain the parameter MessageGroupId.");
       });
 
-      it("[FIFO Queue] without MessageDeduplicationId", () => {
-        expect(async () => {
+      it("[FIFO Queue] without MessageDeduplicationId", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: FifoQueueName,
@@ -2505,8 +2505,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The queue should either have ContentBasedDeduplication enabled or MessageDeduplicationId provided explicitly");
       });
 
-      it("[FIFO Queue] with DelaySeconds", () => {
-        expect(async () => {
+      it("[FIFO Queue] with DelaySeconds", async () => {
+        await expect(async () => {
           await client.send(
             new SendMessageBatchCommand({
               QueueUrl: FifoQueueName,
@@ -2538,8 +2538,8 @@ describe("SQS API", () => {
           );
         });
 
-        it("[Standart Queue] total length", () => {
-          expect(async () => {
+        it("[Standart Queue] total length", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageBatchCommand({
                 QueueUrl,
@@ -2577,8 +2577,8 @@ describe("SQS API", () => {
             );
           }).rejects.toThrow("Batch requests cannot be longer than 262144 bytes. You have sent 262189 bytes.");
         });
-        it("[FIFO Queue] total length", () => {
-          expect(async () => {
+        it("[FIFO Queue] total length", async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageBatchCommand({
                 QueueUrl: FifoQueueUrl,
@@ -2662,7 +2662,7 @@ describe("SQS API", () => {
         });
 
         it("[FIFO Queue] individual message length", async () => {
-          expect(async () => {
+          await expect(async () => {
             await client.send(
               new SendMessageBatchCommand({
                 QueueUrl: FifoQueueUrl,
@@ -3011,64 +3011,64 @@ describe("SQS API", () => {
 
   describe("Change Message Visibility", () => {
     describe("Should fail", () => {
-      it("without ReceiptHandle", () => {
-        expect(async () => {
+      it("without ReceiptHandle", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, VisibilityTimeout: 34 }));
         }).rejects.toThrow("The request must contain the parameter ReceiptHandle.");
       });
 
-      it("with empty ReceiptHandle", () => {
-        expect(async () => {
+      it("with empty ReceiptHandle", async () => {
+        await expect(async () => {
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "", VisibilityTimeout: 34 }));
         }).rejects.toThrow("The request must contain the parameter ReceiptHandle.");
       });
 
-      it("with invalid ReceiptHandle", () => {
+      it("with invalid ReceiptHandle", async () => {
         const ReceiptHandle = "45234sdsqdZER/qsqd";
-        expect(async () => {
+        await expect(async () => {
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle, VisibilityTimeout: 34 }));
         }).rejects.toThrow(`The input receipt handle "${ReceiptHandle}" is not valid.`);
       });
 
-      it("without VisibilityTimeout", () => {
-        expect(async () => {
+      it("without VisibilityTimeout", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id" }));
         }).rejects.toThrow("The request must contain the parameter VisibilityTimeout.");
       });
 
-      it("with invalid VisibilityTimeout (object)", () => {
-        expect(async () => {
+      it("with invalid VisibilityTimeout (object)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id", VisibilityTimeout: {} }));
         }).rejects.toThrow(`Start of structure or map found where not expected.`);
       });
 
-      it("with invalid VisibilityTimeout (array)", () => {
-        expect(async () => {
+      it("with invalid VisibilityTimeout (array)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id", VisibilityTimeout: [] }));
         }).rejects.toThrow(`Start of list found where not expected`);
       });
 
-      it("with invalid VisibilityTimeout (NaN)", () => {
+      it("with invalid VisibilityTimeout (NaN)", async () => {
         const VisibilityTimeout = "dummy-value";
-        expect(async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id", VisibilityTimeout }));
         }).rejects.toThrow(`Value ${VisibilityTimeout} for parameter VisibilityTimeout is invalid. Reason: Must be between 0 and 43200.`);
       });
 
-      it("with invalid VisibilityTimeout (-)", () => {
+      it("with invalid VisibilityTimeout (-)", async () => {
         const VisibilityTimeout = -10;
-        expect(async () => {
+        await expect(async () => {
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id", VisibilityTimeout }));
         }).rejects.toThrow(`Value ${VisibilityTimeout} for parameter VisibilityTimeout is invalid. Reason: Must be between 0 and 43200.`);
       });
-      it("with invalid VisibilityTimeout (+)", () => {
+      it("with invalid VisibilityTimeout (+)", async () => {
         const VisibilityTimeout = 43201;
-        expect(async () => {
+        await expect(async () => {
           await client.send(new ChangeMessageVisibilityCommand({ QueueUrl: StandartQueueName, ReceiptHandle: "dummy id", VisibilityTimeout }));
         }).rejects.toThrow(`Value ${VisibilityTimeout} for parameter VisibilityTimeout is invalid. Reason: Must be between 0 and 43200.`);
       });
@@ -3117,27 +3117,27 @@ describe("SQS API", () => {
 
   describe("Change Message Visibility Batch", () => {
     describe("Should fail", () => {
-      it("without Entries", () => {
-        expect(async () => {
+      it("without Entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityBatchCommand({ QueueUrl: StandartQueueName }));
         }).rejects.toThrow("The request must contain the parameter Entries.");
       });
-      it("with empty entries", () => {
-        expect(async () => {
+      it("with empty entries", async () => {
+        await expect(async () => {
           await client.send(new ChangeMessageVisibilityBatchCommand({ QueueUrl: StandartQueueName, Entries: [] }));
         }).rejects.toThrow("There should be at least one ChangeMessageVisibilityBatch in the request.");
       });
 
-      it("with too much entries", () => {
-        expect(async () => {
+      it("with too much entries", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new ChangeMessageVisibilityBatchCommand({ QueueUrl: StandartQueueName, Entries: [7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6] }));
         }).rejects.toThrow("Maximum number of entries per request are 10. You have sent 11.");
       });
 
-      it("without entry id", () => {
-        expect(async () => {
+      it("without entry id", async () => {
+        await expect(async () => {
           await client.send(
             // @ts-expect-error
             new ChangeMessageVisibilityBatchCommand({
@@ -3159,8 +3159,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("The request must contain the parameter ChangeMessageVisibilityBatch.2.Id.");
       });
 
-      it("with invalid entry id", () => {
-        expect(async () => {
+      it("with invalid entry id", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3175,9 +3175,9 @@ describe("SQS API", () => {
         }).rejects.toThrow("A batch entry id can only contain alphanumeric characters, hyphens and underscores. It can be at most 80 letters long.");
       });
 
-      it("with duplicated entry ids", () => {
+      it("with duplicated entry ids", async () => {
         const Id = "some-id";
-        expect(async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3289,8 +3289,8 @@ describe("SQS API", () => {
         });
       });
 
-      it("with Id as array", () => {
-        expect(async () => {
+      it("with Id as array", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3300,8 +3300,8 @@ describe("SQS API", () => {
           );
         }).rejects.toThrow("Start of list found where not expected");
       });
-      it("with Id as object", () => {
-        expect(async () => {
+      it("with Id as object", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3312,8 +3312,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of structure or map found where not expected");
       });
 
-      it("with VisibilityTimeout as array", () => {
-        expect(async () => {
+      it("with VisibilityTimeout as array", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3323,8 +3323,8 @@ describe("SQS API", () => {
           );
         }).rejects.toThrow("Start of list found where not expected");
       });
-      it("with VisibilityTimeout as object", () => {
-        expect(async () => {
+      it("with VisibilityTimeout as object", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3335,8 +3335,8 @@ describe("SQS API", () => {
         }).rejects.toThrow("Start of structure or map found where not expected");
       });
 
-      it("with ReceiptHandle as array", () => {
-        expect(async () => {
+      it("with ReceiptHandle as array", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3346,8 +3346,8 @@ describe("SQS API", () => {
           );
         }).rejects.toThrow("Start of list found where not expected");
       });
-      it("with ReceiptHandle as object", () => {
-        expect(async () => {
+      it("with ReceiptHandle as object", async () => {
+        await expect(async () => {
           await client.send(
             new ChangeMessageVisibilityBatchCommand({
               QueueUrl: StandartQueueName,
@@ -3480,66 +3480,66 @@ describe("SQS API", () => {
         await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
       });
 
-      it("without Actions", () => {
-        expect(async () => {
+      it("without Actions", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new AddPermissionCommand({ QueueUrl, AWSAccountIds: ["123456789012"], Label: "Permission1" }));
         }).rejects.toThrow("The request must contain the parameter ActionName.");
       });
 
-      it("with empty Actions", () => {
-        expect(async () => {
+      it("with empty Actions", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: [], AWSAccountIds: ["123456789012"], Label: "Permission1" }));
         }).rejects.toThrow("The request must contain the parameter ActionName.");
       });
 
-      it("with invalid Actions", () => {
-        expect(async () => {
+      it("with invalid Actions", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessageBatch"], AWSAccountIds: ["123456789012"], Label: "Permission1" }));
         }).rejects.toThrow("Value SQS:SendMessageBatch for parameter ActionName is invalid. Reason: Please refer to the appropriate WSDL for a list of valid actions.");
       });
 
-      it("with forbidden Actions", () => {
-        expect(async () => {
+      it("with forbidden Actions", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["CreateQueue"], AWSAccountIds: ["123456789012"], Label: "Permission1" }));
         }).rejects.toThrow("Value SQS:CreateQueue for parameter ActionName is invalid. Reason: Only the queue owner is allowed to invoke this action.");
       });
 
-      it("without AWSAccountIds", () => {
-        expect(async () => {
+      it("without AWSAccountIds", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessage"], Label: "Permission1" }));
         }).rejects.toThrow("The request must contain the parameter AWSAccountIds.");
       });
 
-      it("with empty AWSAccountIds", () => {
-        expect(async () => {
+      it("with empty AWSAccountIds", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessage"], AWSAccountIds: [], Label: "Permission1" }));
         }).rejects.toThrow("The request must contain the parameter AWSAccountIds.");
       });
 
-      it("without Label", () => {
-        expect(async () => {
+      it("without Label", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessage"], AWSAccountIds: ["123456789012"] }));
         }).rejects.toThrow("The request must contain the parameter Label.");
       });
 
-      it("without empty Label", () => {
-        expect(async () => {
+      it("without empty Label", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessage"], AWSAccountIds: ["123456789012"], Label: "" }));
         }).rejects.toThrow("The request must contain the parameter Label.");
       });
 
-      it("with same Label and different Statement", () => {
-        expect(async () => {
+      it("with same Label and different Statement", async () => {
+        await expect(async () => {
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["SendMessage"], AWSAccountIds: ["123456789012"], Label: "Permission1" }));
           await client.send(new AddPermissionCommand({ QueueUrl, Actions: ["DeleteMessage"], AWSAccountIds: ["123456789012"], Label: "Permission1" }));
         }).rejects.toThrow("Value Permission1 for parameter Label is invalid. Reason: Already exists.");
       });
 
-      it("with over statement limit", () => {
-        expect(async () => {
+      it("with over statement limit", async () => {
+        await expect(async () => {
           let i = 1;
 
           while (i < 22) {
@@ -3668,21 +3668,21 @@ describe("SQS API", () => {
       await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
     });
 
-    it("should fail without Label", () => {
-      expect(async () => {
+    it("should fail without Label", async () => {
+      await expect(async () => {
         // @ts-expect-error
         await client.send(new RemovePermissionCommand({ QueueUrl }));
       }).rejects.toThrow("The request must contain the parameter Label.");
     });
 
-    it("should fail with empty Label", () => {
-      expect(async () => {
+    it("should fail with empty Label", async () => {
+      await expect(async () => {
         await client.send(new RemovePermissionCommand({ QueueUrl, Label: "" }));
       }).rejects.toThrow("The request must contain the parameter Label.");
     });
 
-    it("should fail with inexisting Statement", () => {
-      expect(async () => {
+    it("should fail with inexisting Statement", async () => {
+      await expect(async () => {
         await client.send(new RemovePermissionCommand({ QueueUrl, Label: "InvalidPermissionLabel" }));
       }).rejects.toThrow("Value InvalidPermissionLabel for parameter Label is invalid. Reason: can't find label on existing policy.");
     });
@@ -3724,18 +3724,18 @@ describe("SQS API", () => {
     });
 
     describe("Should fail", () => {
-      it("with invalid MaxResults integer range", () => {
-        expect(async () => {
+      it("with invalid MaxResults integer range", async () => {
+        await expect(async () => {
           await client.send(new ListDeadLetterSourceQueuesCommand({ QueueUrl: QueueName, MaxResults: -23 }));
         }).rejects.toThrow("Value for parameter MaxResults is invalid. Reason: MaxResults must be an integer between 1 and 1000.");
 
-        expect(async () => {
+        await expect(async () => {
           await client.send(new ListDeadLetterSourceQueuesCommand({ QueueUrl: QueueName, MaxResults: 1020 }));
         }).rejects.toThrow("Value for parameter MaxResults is invalid. Reason: MaxResults must be an integer between 1 and 1000.");
       });
 
-      it("with invalid NextToken", () => {
-        expect(async () => {
+      it("with invalid NextToken", async () => {
+        await expect(async () => {
           await client.send(new ListDeadLetterSourceQueuesCommand({ QueueUrl: QueueName, NextToken: "invalidtoken" }));
         }).rejects.toThrow("Invalid or expired next token.");
       });
@@ -3842,65 +3842,65 @@ describe("SQS API", () => {
           await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
         });
 
-        it("without Attributes", () => {
-          expect(async () => {
+        it("without Attributes", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SetQueueAttributesCommand({ QueueUrl }));
           }).rejects.toThrow("The request must contain the parameter Attribute.Name.");
         });
 
-        it("with invalid Attributes type", () => {
-          expect(async () => {
+        it("with invalid Attributes type", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: [] }));
           }).rejects.toThrow("The request must contain the parameter Attribute.Name.");
         });
-        it("with empty Attributes", () => {
-          expect(async () => {
+        it("with empty Attributes", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: {} }));
           }).rejects.toThrow("The request must contain the parameter Attribute.Name.");
         });
 
-        it("with invalid Attribute name", () => {
-          expect(async () => {
+        it("with invalid Attribute name", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { FifoQueue: "true" } }));
           }).rejects.toThrow("Unknown Attribute FifoQueue.");
         });
 
-        it("with invalid Attribute type (object)", () => {
-          expect(async () => {
+        it("with invalid Attribute type (object)", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { DelaySeconds: {} } }));
           }).rejects.toThrow("Start of structure or map found where not expected.");
         });
 
-        it("with invalid Attribute type (object)", () => {
-          expect(async () => {
+        it("with invalid Attribute type (object)", async () => {
+          await expect(async () => {
             // @ts-expect-error
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { DelaySeconds: [] } }));
           }).rejects.toThrow("Start of list found where not expected");
         });
 
-        it("with invalid queue Attribute (FifoThroughputLimit)", () => {
-          expect(async () => {
+        it("with invalid queue Attribute (FifoThroughputLimit)", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { FifoThroughputLimit: "perQueue" } }));
           }).rejects.toThrow("You can specify the FifoThroughputLimit only when FifoQueue is set to true.");
         });
 
-        it("with invalid queue Attribute (DeduplicationScope)", () => {
-          expect(async () => {
+        it("with invalid queue Attribute (DeduplicationScope)", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { DeduplicationScope: "messageGroup" } }));
           }).rejects.toThrow("You can specify the DeduplicationScope only when FifoQueue is set to true.");
         });
 
-        it("with invalid queue Attribute (SqsManagedSseEnabled + KmsMasterKeyId)", () => {
-          expect(async () => {
+        it("with invalid queue Attribute (SqsManagedSseEnabled + KmsMasterKeyId)", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { SqsManagedSseEnabled: "true", KmsMasterKeyId: "alias/aws/sqs" } }));
           }).rejects.toThrow("You can use one type of server-side encryption (SSE) at one time. You can either enable KMS SSE or SQS SSE.");
         });
 
-        it("with invalid Policy Statement length", () => {
-          expect(async () => {
+        it("with invalid Policy Statement length", async () => {
+          await expect(async () => {
             const Policy = JSON.stringify({
               Version: "2012-10-17",
               Statement: Array(22)
@@ -4051,8 +4051,8 @@ describe("SQS API", () => {
           expect(JSON.parse(res).Attributes).deep.eq({ DelaySeconds: "10", RedriveAllowPolicy });
         });
 
-        it("Should fail", () => {
-          expect(async () => {
+        it("Should fail", async () => {
+          await expect(async () => {
             const attribs = JSON.stringify({ RedriveAllowPolicy: JSON.stringify({ redrivePermission: "ALL" }) });
             await cli(`set-queue-attributes --queue-url ${QueueUrl} --attributes '${attribs}'`);
           });
@@ -4067,8 +4067,8 @@ describe("SQS API", () => {
           await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { FifoQueue: "true" } }));
         });
 
-        it("with invalid FifoThroughputLimit", () => {
-          expect(async () => {
+        it("with invalid FifoThroughputLimit", async () => {
+          await expect(async () => {
             await client.send(new SetQueueAttributesCommand({ QueueUrl, Attributes: { FifoThroughputLimit: "perMessageGroupId" } }));
           }).rejects.toThrow("The perMessageGroupId value is allowed only when the value for DeduplicationScope is messageGroup");
         });
@@ -4174,133 +4174,133 @@ describe("SQS API", () => {
         );
       });
 
-      it("without SourceArn", () => {
-        expect(async () => {
+      it("without SourceArn", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({}));
         }).rejects.toThrow("The request must contain the parameter SourceArn.");
       });
 
-      it("with empty SourceArn", () => {
-        expect(async () => {
+      it("with empty SourceArn", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn: "" }));
         }).rejects.toThrow("You must use this format to specify the SourceArn: arn:<partition>:<service>:<region>:<account-id>:<resource-id>");
       });
 
-      it("with invalid SourceArn type (object)", () => {
-        expect(async () => {
+      it("with invalid SourceArn type (object)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn: {} }));
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("with invalid SourceArn type (array)", () => {
-        expect(async () => {
+      it("with invalid SourceArn type (array)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn: [] }));
         }).rejects.toThrow("Start of list found where not expected");
       });
 
-      it("with inexisting SourceArn", () => {
-        expect(async () => {
+      it("with inexisting SourceArn", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn: "arn:aws:sqs:eu-west-3:123456789012:IDontExist" }));
         }).rejects.toThrow("The resource that you specified for the SourceArn parameter doesn't exist.");
       });
 
-      it("without DLQ Policy SourceArn Queue", () => {
-        expect(async () => {
+      it("without DLQ Policy SourceArn Queue", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "ImNotDLQ" }));
           await client.send(new StartMessageMoveTaskCommand({ SourceArn: "arn:aws:sqs:eu-west-3:123456789012:ImNotDLQ" }));
         }).rejects.toThrow("Source queue must be configured as a Dead Letter Queue.");
       });
 
-      it("with invalid DestinationArn", () => {
-        expect(async () => {
+      it("with invalid DestinationArn", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: "invalid" }));
         }).rejects.toThrow("You must use this format to specify the DestinationArn: arn:<partition>:<service>:<region>:<account-id>:<resource-id>");
       });
 
-      it("with inexisting DestinationArn", () => {
-        expect(async () => {
+      it("with inexisting DestinationArn", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: "arn:aws:sqs:eu-west-3:123456789012:IDontExist" }));
         }).rejects.toThrow("The resource that you specified for the DestinationArn parameter doesn't exist.");
       });
 
-      it("with same ARN", () => {
-        expect(async () => {
+      it("with same ARN", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: SourceArn }));
         }).rejects.toThrow("Source queue arn and destination queue arn cannot be the same.");
       });
 
-      it("with invalid MaxNumberOfMessagesPerSecond (-)", () => {
-        expect(async () => {
+      it("with invalid MaxNumberOfMessagesPerSecond (-)", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 0 }));
         }).rejects.toThrow("Value for parameter MaxNumberOfMessagesPerSecond is invalid. Reason: You must enter a number that's between 1 and 500.");
       });
 
-      it("with invalid MaxNumberOfMessagesPerSecond (+)", () => {
-        expect(async () => {
+      it("with invalid MaxNumberOfMessagesPerSecond (+)", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 509 }));
         }).rejects.toThrow("Value for parameter MaxNumberOfMessagesPerSecond is invalid. Reason: You must enter a number that's between 1 and 500.");
       });
 
-      it("with empty DestinationArn", () => {
-        expect(async () => {
+      it("with empty DestinationArn", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: "" }));
         }).rejects.toThrow("You must use this format to specify the DestinationArn: arn:<partition>:<service>:<region>:<account-id>:<resource-id>");
       });
 
-      it("with invalid DestinationArn type (object)", () => {
-        expect(async () => {
+      it("with invalid DestinationArn type (object)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: {} }));
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("with invalid DestinationArn type (array)", () => {
-        expect(async () => {
+      it("with invalid DestinationArn type (array)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: [] }));
         }).rejects.toThrow("Start of list found where not expected");
       });
 
-      it("with empty MaxNumberOfMessagesPerSecond", () => {
-        expect(async () => {
+      it("with empty MaxNumberOfMessagesPerSecond", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: "" }));
         }).rejects.toThrow("STRING_VALUE can not be converted to an Integer");
       });
 
-      it("with multi empty MaxNumberOfMessagesPerSecond", () => {
-        expect(async () => {
+      it("with multi empty MaxNumberOfMessagesPerSecond", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: " " }));
         }).rejects.toThrow("STRING_VALUE can not be converted to an Integer");
       });
 
-      it("with invalid MaxNumberOfMessagesPerSecond type (object)", () => {
-        expect(async () => {
+      it("with invalid MaxNumberOfMessagesPerSecond type (object)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: {} }));
         }).rejects.toThrow("Start of structure or map found where not expected.");
       });
 
-      it("with invalid MaxNumberOfMessagesPerSecond type (array)", () => {
-        expect(async () => {
+      it("with invalid MaxNumberOfMessagesPerSecond type (array)", async () => {
+        await expect(async () => {
           // @ts-expect-error
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: [] }));
         }).rejects.toThrow("Start of list found where not expected");
       });
 
-      it("with invalid Source/Destination Queue Type", () => {
-        expect(async () => {
+      it("with invalid Source/Destination Queue Type", async () => {
+        await expect(async () => {
           await client.send(new CreateQueueCommand({ QueueName: "Destination.fifo", Attributes: { FifoQueue: "true" } }));
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn: "arn:aws:sqs:eu-west-3:123456789012:Destination.fifo" }));
         }).rejects.toThrow("The source queue and destination queue must be of the same queue type.");
       });
 
-      it("when a Task is already running", () => {
-        expect(async () => {
+      it("when a Task is already running", async () => {
+        await expect(async () => {
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 1 }));
           await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 1 }));
         }).rejects.toThrow("There is already a task running. Only one active task is allowed for a source queue arn at a given time.");
