@@ -1924,6 +1924,7 @@ describe("SQS API", () => {
 
       it("[FIFO] should fail to delete visible message", async () => {
         const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl, VisibilityTimeout: 0 }));
+        await sleep(1);
         const [msg] = Messages!;
         await expect(async () => {
           await client.send(new DeleteMessageCommand({ QueueUrl, ReceiptHandle: msg.ReceiptHandle }));

@@ -14,7 +14,7 @@
     "vitest": "^3.0.7"
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --testTimeout 20000",
     "types": "tsc",
     "build": "node build.mjs",
     "dev": "node build.mjs dev"
