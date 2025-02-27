@@ -1,5 +1,4 @@
 import { SqsCommand } from "./sqsCommand";
-import { Queue } from "../lib/queue";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 import { InvalidArnException, InvalidParameterValueException, MissingParameterException, ResourceNotFoundException, throwOnNoPrimitiveType } from "../common/errors";
 import { getQueueNameFromArn, isJsObject } from "../common/utils";
@@ -19,9 +18,9 @@ export class CancelMessageMoveTask extends SqsCommand {
 
     const QueueName = getQueueNameFromArn(sourceArn);
 
-    this.foundQueue = Queue.Queues.find((x) => x.QueueName == QueueName);
+    this.foundQueue = this.service.Queues.find((x) => x.QueueName == QueueName);
 
-    if (!this.foundQueue || Queue.deletingQueues.has(QueueName)) {
+    if (!this.foundQueue || this.service.deletingQueues.has(QueueName)) {
       throw new ResourceNotFoundException("The resource that you specified for the SourceArn parameter doesn't exist.");
     }
 

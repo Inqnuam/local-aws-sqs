@@ -1,5 +1,4 @@
 import { SqsCommand } from "./sqsCommand";
-import { Queue } from "../lib/queue";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 import {
   InvalidArnException,
@@ -42,13 +41,13 @@ export class StartMessageMoveTask extends SqsCommand {
 
     const QueueName = getQueueNameFromArn(SourceArn);
 
-    this.foundQueue = Queue.Queues.find((x) => x.QueueName == QueueName);
+    this.foundQueue = this.service.Queues.find((x) => x.QueueName == QueueName);
 
-    if (!this.foundQueue || Queue.deletingQueues.has(QueueName)) {
+    if (!this.foundQueue || this.service.deletingQueues.has(QueueName)) {
       throw new ResourceNotFoundException("The resource that you specified for the SourceArn parameter doesn't exist.");
     }
 
-    const isDlq = Queue.Queues.find((x) => x.RedrivePolicy?.deadLetterTargetArn.endsWith(`:${QueueName}`));
+    const isDlq = this.service.Queues.find((x) => x.RedrivePolicy?.deadLetterTargetArn.endsWith(`:${QueueName}`));
 
     if (!isDlq) {
       throw new InvalidParameterValueException("Source queue must be configured as a Dead Letter Queue.");
@@ -65,7 +64,7 @@ export class StartMessageMoveTask extends SqsCommand {
 
       const DlqName = getQueueNameFromArn(DestinationArn);
 
-      const destinationdQueue = Queue.Queues.find((x) => x.QueueName == DlqName);
+      const destinationdQueue = this.service.Queues.find((x) => x.QueueName == DlqName);
 
       if (!destinationdQueue) {
         throw new ResourceNotFoundException("The resource that you specified for the DestinationArn parameter doesn't exist.");

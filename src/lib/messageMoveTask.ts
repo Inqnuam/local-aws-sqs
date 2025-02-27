@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { Queue } from "./queue";
 import { InvalidParameterValueException } from "../common/errors";
 import { getQueueNameFromArn } from "../common/utils";
+import type { SqsService } from "./sqsService";
 
 export interface IStartMessageMoveTask {
   SourceArn: string;
@@ -130,9 +131,9 @@ export class MessageMoveTask {
 
     let queue: Queue | undefined = undefined;
     if (this.DestinationArn) {
-      queue = findQueue(this.#DestinationQueueName!);
+      queue = findQueue(this.#DestinationQueueName!, this.#sourceQueue.service);
     } else {
-      queue = findQueue(getQueueNameFromArn(DeadLetterQueueSourceArn));
+      queue = findQueue(getQueueNameFromArn(DeadLetterQueueSourceArn), this.#sourceQueue.service);
     }
 
     if (!queue) {
@@ -162,10 +163,10 @@ export class MessageMoveTask {
   }
 }
 
-const findQueue = (QueueName: string) => {
-  const foundQueue = Queue.Queues.find((x) => x.QueueName == QueueName);
+const findQueue = (QueueName: string, service: SqsService) => {
+  const foundQueue = service.Queues.find((x) => x.QueueName == QueueName);
 
-  if (!foundQueue || Queue.deletingQueues.has(foundQueue.QueueName)) {
+  if (!foundQueue || service.deletingQueues.has(foundQueue.QueueName)) {
     return;
   }
 

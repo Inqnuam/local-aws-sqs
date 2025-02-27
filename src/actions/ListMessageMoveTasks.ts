@@ -44,7 +44,7 @@ export class ListMessageMoveTasks extends SqsCommand {
 
     const QueueName = getQueueNameFromArn(SourceArn);
 
-    this.foundQueue = Queue.Queues.find((x) => x.QueueName == QueueName);
+    this.foundQueue = this.service.Queues.find((x) => x.QueueName == QueueName);
 
     if (!this.foundQueue) {
       throw new ResourceNotFoundException("The resource that you specified for the SourceArn parameter doesn't exist.");

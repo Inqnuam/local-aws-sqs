@@ -1,15 +1,7 @@
 import { SqsCommand } from "./sqsCommand";
 import { ALPHANUM_PUNCT_PATTERN } from "../common/constants";
-import {
-  MissingParameterException,
-  InvalidParameterValueException,
-  SqsError,
-  MalformedInputException,
-  UnexcpectedObject,
-  UnexcpectedList,
-  throwOnNoPrimitiveType,
-} from "../common/errors";
-import { isJsObject, sha256, verifyQueueAttribValue } from "../common/utils";
+import { MissingParameterException, InvalidParameterValueException, SqsError, MalformedInputException, throwOnNoPrimitiveType } from "../common/errors";
+import { sha256, verifyQueueAttribValue } from "../common/utils";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 import { verifyMessageAttributes } from "../validators/verifyMessageAttributes";
 import { verifyAttributeValueStructure } from "../validators/verifyAttributeValueStructure";

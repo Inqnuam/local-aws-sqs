@@ -1,6 +1,6 @@
 import { SqsCommand } from "./sqsCommand";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
-import { MissingParameterException, ReceiptHandleIsInvalidException, SqsError, UnexcpectedList, UnexcpectedObject } from "../common/errors";
+import { MissingParameterException, ReceiptHandleIsInvalidException, UnexcpectedList, UnexcpectedObject } from "../common/errors";
 import { isJsObject } from "../common/utils";
 
 export class DeleteMessage extends SqsCommand {

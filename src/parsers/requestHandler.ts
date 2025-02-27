@@ -25,13 +25,13 @@ import { TagQueue } from "../actions/TagQueue";
 import { UntagQueue } from "../actions/UntagQueue";
 import { UnknownOperation } from "../actions/unknownOperation";
 import { SqsError, UnexcpectedList, UnexcpectedObject } from "../common/errors";
-import { Queue } from "../lib/queue";
 import { isJsObject } from "../common/utils";
 import { AWS_DEFAULT_REGION_ENV, AWS_REGION_ENV } from "../common/constants";
 import { createQueue } from "../lib/createQueue";
+import { SqsService } from "../lib/sqsService";
 
-const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
-  const { Action, RequestId, body, foundQueue, isJsonProtocol, QueueUrl, traceId } = await parseSqsHttpRequest(req);
+const requestHandler = (service: SqsService) => async (req: IncomingMessage, res: ServerResponse) => {
+  const { Action, RequestId, body, foundQueue, isJsonProtocol, QueueUrl, traceId } = await parseSqsHttpRequest(req, service);
 
   try {
     if (QueueUrl) {
@@ -45,76 +45,76 @@ const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
 
     switch (Action) {
       case "AddPermission":
-        await new AddPermission(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new AddPermission(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "CancelMessageMoveTask":
-        await new CancelMessageMoveTask(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new CancelMessageMoveTask(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ChangeMessageVisibility":
-        await new ChangeMessageVisibility(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ChangeMessageVisibility(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ChangeMessageVisibilityBatch":
-        await new ChangeMessageVisibilityBatch(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ChangeMessageVisibilityBatch(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "CreateQueue":
-        await new CreateQueue(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new CreateQueue(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "DeleteMessage":
-        await new DeleteMessage(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new DeleteMessage(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "DeleteMessageBatch":
-        await new DeleteMessageBatch(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new DeleteMessageBatch(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "DeleteQueue":
-        await new DeleteQueue(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new DeleteQueue(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "GetQueueAttributes":
-        await new GetQueueAttributes(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new GetQueueAttributes(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "GetQueueUrl":
-        await new GetQueueUrl(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new GetQueueUrl(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ListDeadLetterSourceQueues":
-        await new ListDeadLetterSourceQueues(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ListDeadLetterSourceQueues(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ListMessageMoveTasks":
-        await new ListMessageMoveTasks(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ListMessageMoveTasks(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ListQueues":
-        await new ListQueues(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ListQueues(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ListQueueTags":
-        await new ListQueueTags(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ListQueueTags(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "PurgeQueue":
-        await new PurgeQueue(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new PurgeQueue(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "ReceiveMessage":
-        await new ReceiveMessage(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new ReceiveMessage(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "RemovePermission":
-        await new RemovePermission(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new RemovePermission(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "SendMessage":
-        await new SendMessage(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new SendMessage(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "SendMessageBatch":
-        await new SendMessageBatch(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new SendMessageBatch(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "SetQueueAttributes":
-        await new SetQueueAttributes(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new SetQueueAttributes(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "StartMessageMoveTask":
-        await new StartMessageMoveTask(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new StartMessageMoveTask(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "TagQueue":
-        await new TagQueue(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new TagQueue(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       case "UntagQueue":
-        await new UntagQueue(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new UntagQueue(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
       default:
-        await new UnknownOperation(req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
+        await new UnknownOperation(service, req, res, isJsonProtocol, RequestId, body, foundQueue, traceId).exec();
         break;
     }
   } catch (error) {
@@ -210,43 +210,52 @@ export interface ISqsServerOptions {
 }
 
 export const createRequestHandler = (options: ISqsServerOptions) => {
-  Queue.PORT = options.port;
+  const service = new SqsService();
+
+  service.PORT = options.port;
 
   if (options.hostname) {
-    Queue.HOSTNAME = options.hostname;
+    service.HOSTNAME = options.hostname;
   }
 
   if (typeof options.validateDlqDestination == "boolean") {
-    Queue.validateDlqDestination = options.validateDlqDestination;
+    service.validateDlqDestination = options.validateDlqDestination;
   }
 
   if (typeof options.region == "string") {
-    Queue.REGION = options.region;
+    service.REGION = options.region;
   } else {
     const region = process.env[AWS_REGION_ENV] ?? process.env[AWS_DEFAULT_REGION_ENV];
 
     if (region) {
-      Queue.REGION = region;
+      service.REGION = region;
     }
   }
 
+  if (typeof options.accountId == "string") {
+    service.ACCOUNT_ID = options.accountId;
+  }
+
   if (typeof options.baseUrl == "string") {
-    Queue.BASE_URL = options.baseUrl;
+    service.BASE_URL = options.baseUrl;
   }
 
   if (typeof options.emulateQueueCreationLifecycle == "boolean") {
-    Queue.emulateQueueCreationLifecycle = options.emulateQueueCreationLifecycle;
+    service.emulateQueueCreationLifecycle = options.emulateQueueCreationLifecycle;
   }
 
   if (typeof options.emulateLazyQueues == "boolean") {
-    Queue.emulateLazyQueues = options.emulateLazyQueues;
+    service.emulateLazyQueues = options.emulateLazyQueues;
   }
 
   if (Array.isArray(options.queues)) {
     for (const q of options.queues) {
-      createQueue(q, true);
+      createQueue(q, true, service);
     }
   }
 
-  return requestHandler;
+  return {
+    service,
+    requestHandler: requestHandler(service),
+  };
 };

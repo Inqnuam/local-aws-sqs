@@ -17,7 +17,8 @@ import {
   OverLimitException,
 } from "../common/errors";
 import { verifyQueueAttribValue, isJsObject } from "../common/utils";
-import { type IQueueConfig, Queue } from "./queue";
+import { type IQueueConfig } from "./queue";
+import type { SqsService } from "./sqsService";
 
 const setKmsDataKeyReusePeriodSeconds = (config: IQueueConfig, Attributes: Record<string, string>) => {
   if (Attributes.KmsDataKeyReusePeriodSeconds === undefined || Attributes.KmsDataKeyReusePeriodSeconds === null) {
@@ -72,7 +73,7 @@ const parseBoolean = (s: string) => {
   }
 };
 
-export const setAttributes = (config: IQueueConfig, Attributes: Record<string, string>, isCreating: boolean = true) => {
+export const setAttributes = (config: IQueueConfig, Attributes: Record<string, string>, sqsService: SqsService, isCreating: boolean = true) => {
   for (const [Name, Value] of Object.entries(Attributes)) {
     switch (Name) {
       case "FifoQueue":
@@ -282,8 +283,8 @@ export const setAttributes = (config: IQueueConfig, Attributes: Record<string, s
       );
     }
 
-    if (Queue.validateDlqDestination) {
-      if (!Queue.Queues.find((x) => x.QueueName == dlq)) {
+    if (sqsService.validateDlqDestination) {
+      if (!sqsService.Queues.find((x) => x.QueueName == dlq)) {
         throw new InvalidParameterValueException(`Value ${Attributes.RedrivePolicy} for parameter RedrivePolicy is invalid. Reason: Dead letter target does not exist.`);
       }
     }

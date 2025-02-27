@@ -2,10 +2,12 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { AWS_JSON_TYPE, AWS_XML_TYPE } from "../common/constants";
 import { Queue } from "../lib/queue";
 import { SqsError } from "../common/errors";
+import type { SqsService } from "../lib/sqsService";
 
 export abstract class SqsCommand {
   body: any;
   constructor(
+    public service: SqsService,
     public req: IncomingMessage,
     public res: ServerResponse,
     public isJsonProtocol: boolean,
@@ -25,7 +27,7 @@ export abstract class SqsCommand {
   abstract exec(): Promise<any>;
 
   verifyExistingQueue() {
-    if (!this.reqBody.QueueUrl || !this.foundQueue || Queue.deletingQueues.has(this.foundQueue.QueueName)) {
+    if (!this.reqBody.QueueUrl || !this.foundQueue || this.service.deletingQueues.has(this.foundQueue.QueueName)) {
       throw new SqsError({
         Code: "AWS.SimpleQueueService.NonExistentQueue",
         Type: "com.amazonaws.sqs#QueueDoesNotExist",

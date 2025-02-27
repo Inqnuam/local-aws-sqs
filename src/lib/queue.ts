@@ -30,6 +30,7 @@ import {
 } from "../common/constants";
 import { MessageMoveTask, type IStartMessageMoveTask } from "./messageMoveTask";
 import { md5OfMessageAttributes } from "aws-md5-of-message-attributes";
+import type { SqsService } from "./sqsService";
 
 const SEQ_NUMBER_LENGTH = 20;
 
@@ -99,17 +100,6 @@ export interface IPolicy {
 }
 
 export class Queue implements IQueueConfig {
-  static REGION = "us-east-1";
-  static ACCOUNT_ID = "123456789012";
-  static PORT = 0;
-  static HOSTNAME = "localhost";
-  static Queues: Queue[] = [];
-  static BASE_URL: string = "/";
-  static validateDlqDestination = true;
-  static emulateLazyQueues = false;
-  static emulateQueueCreationLifecycle = true;
-  static deletingQueues: Set<string> = new Set();
-
   readonly QueueName: string;
   readonly FifoQueue: boolean = false;
 
@@ -140,28 +130,31 @@ export class Queue implements IQueueConfig {
   #MessageMoveTasks: MessageMoveTask[] = [];
   #IN_FLIGHT_LIMIT: number;
   get QueueUrl() {
-    const port = Queue.PORT == 80 || Queue.PORT == 443 ? "" : `:${Queue.PORT}`;
-    return `http://${Queue.HOSTNAME}${port}${Queue.BASE_URL}${Queue.ACCOUNT_ID}/${this.QueueName}`;
+    const port = this.service.PORT == 80 || this.service.PORT == 443 ? "" : `:${this.service.PORT}`;
+    return `http://${this.service.HOSTNAME}${port}${this.service.BASE_URL}${this.service.ACCOUNT_ID}/${this.QueueName}`;
   }
-  constructor({
-    QueueName,
-    ContentBasedDeduplication,
-    DeduplicationScope,
-    DelaySeconds,
-    FifoQueue,
-    FifoThroughputLimit,
-    KmsDataKeyReusePeriodSeconds,
-    KmsMasterKeyId,
-    MaximumMessageSize,
-    MessageRetentionPeriod,
-    ReceiveMessageWaitTimeSeconds,
-    VisibilityTimeout,
-    RedriveAllowPolicy,
-    RedrivePolicy,
-    SqsManagedSseEnabled,
-    Tags,
-    Policy,
-  }: IQueueConfig) {
+  constructor(
+    {
+      QueueName,
+      ContentBasedDeduplication,
+      DeduplicationScope,
+      DelaySeconds,
+      FifoQueue,
+      FifoThroughputLimit,
+      KmsDataKeyReusePeriodSeconds,
+      KmsMasterKeyId,
+      MaximumMessageSize,
+      MessageRetentionPeriod,
+      ReceiveMessageWaitTimeSeconds,
+      VisibilityTimeout,
+      RedriveAllowPolicy,
+      RedrivePolicy,
+      SqsManagedSseEnabled,
+      Tags,
+      Policy,
+    }: IQueueConfig,
+    public service: SqsService
+  ) {
     this.QueueName = QueueName;
 
     if (typeof SqsManagedSseEnabled == "boolean") {
@@ -238,7 +231,7 @@ export class Queue implements IQueueConfig {
       this.Policy = Policy;
     } else {
       this.Policy = {
-        Id: `arn:aws:sqs:${Queue.REGION}:${Queue.ACCOUNT_ID}:${this.QueueName}/SQSDefaultPolicy`,
+        Id: `arn:aws:sqs:${this.service.REGION}:${this.service.ACCOUNT_ID}:${this.QueueName}/SQSDefaultPolicy`,
         Version: "2012-10-17",
       };
     }
@@ -345,7 +338,7 @@ export class Queue implements IQueueConfig {
     this.LastModifiedTimestamp = Date.now() / 1000;
   }
   #moveToDlq = (msg: any) => {
-    const dlq = Queue.Queues.find((x) => x.QueueName == this.#DLQName);
+    const dlq = this.service.Queues.find((x) => x.QueueName == this.#DLQName);
 
     const { MessageId, MessageBody, attributes, MessageAttributes } = msg.record;
 
@@ -362,7 +355,7 @@ export class Queue implements IQueueConfig {
     }
 
     const MessageSystemAttributes: Record<string, any> = {
-      DeadLetterQueueSourceArn: { DataType: "String", StringValue: `arn:aws:sqs:${Queue.REGION}:${Queue.ACCOUNT_ID}:${this.QueueName}` },
+      DeadLetterQueueSourceArn: { DataType: "String", StringValue: `arn:aws:sqs:${this.service.REGION}:${this.service.ACCOUNT_ID}:${this.QueueName}` },
     };
 
     if (attributes.AWSTraceHeader) {
@@ -682,7 +675,7 @@ export class Queue implements IQueueConfig {
         AWS: `arn:aws:iam::${AccountId}:root`,
       },
       Action,
-      Resource: `arn:aws:sqs:${Queue.REGION}:${AccountId}:${this.QueueName}`,
+      Resource: `arn:aws:sqs:${this.service.REGION}:${AccountId}:${this.QueueName}`,
     } as const;
 
     const foundStatement = this.#findPolicyStatement(label);
@@ -754,7 +747,7 @@ export class Queue implements IQueueConfig {
     }
 
     const attr: Record<string, string | undefined> = {
-      QueueArn: `arn:aws:sqs:${Queue.REGION}:${Queue.ACCOUNT_ID}:${this.QueueName}`,
+      QueueArn: `arn:aws:sqs:${this.service.REGION}:${this.service.ACCOUNT_ID}:${this.QueueName}`,
       ApproximateNumberOfMessages: String(this.#records.filter((x) => !x.delayed).length),
       ApproximateNumberOfMessagesNotVisible: String(this.#records.filter((x) => !x.visible).length),
       ApproximateNumberOfMessagesDelayed: String(this.#delayed),
@@ -864,7 +857,7 @@ export class Queue implements IQueueConfig {
       }
     }
 
-    const result = Queue.Queues.filter((x) => x.RedrivePolicy?.deadLetterTargetArn.endsWith(`:${this.QueueName}`)).map((x) => x.QueueUrl);
+    const result = this.service.Queues.filter((x) => x.RedrivePolicy?.deadLetterTargetArn.endsWith(`:${this.QueueName}`)).map((x) => x.QueueUrl);
 
     const total = result.length;
 
@@ -908,78 +901,6 @@ export class Queue implements IQueueConfig {
     return task.cancel();
   }
 
-  static resetAll() {
-    for (const q of this.Queues) {
-      q.clearRecords();
-    }
-    this.Queues = [];
-    this.deletingQueues.clear();
-  }
-  static listQueues = ({ prefix, limit, token }: { prefix?: string; limit?: number; token?: string }) => {
-    let previousStartPosition = 0;
-    if (token) {
-      if (!limit) {
-        throw new InvalidParameterValueException("MaxResults is a mandatory parameter when you provide a value for NextToken.");
-      }
-
-      try {
-        const parsedToken = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
-        previousStartPosition = parsedToken.previousStartPosition;
-
-        if (parsedToken.previousPrefix && (parsedToken.previousPrefix != prefix || !prefix)) {
-          throw new InvalidParameterValueException("Invalid NextToken value. If you are passing in NextToken, you must not change the other request parameters.");
-        }
-      } catch (error) {
-        if (error instanceof SqsError) {
-          throw error;
-        } else {
-          throw new InvalidParameterValueException("Invalid NextToken value.");
-        }
-      }
-    }
-
-    let list = typeof prefix == "string" ? Queue.Queues.filter((x) => x.QueueName.startsWith(prefix)) : Queue.Queues;
-
-    let nextToken: any;
-    if (limit) {
-      if (limit > 1000 || limit < 1) {
-        throw new InvalidParameterValueException("Value for parameter MaxResults is invalid. Reason: MaxResults must be an integer between 1 and 1000.");
-      }
-
-      const listLength = list.length;
-      list = list.slice().splice(previousStartPosition, limit);
-
-      if (previousStartPosition + limit < listLength) {
-        nextToken = {
-          previousStartPosition: previousStartPosition + limit,
-          previousPrefix: prefix,
-          date: Date.now(),
-        };
-      }
-    }
-
-    if (list.length > 1000) {
-      list = list.slice().splice(0, 1000);
-
-      if (nextToken) {
-        nextToken.previousStartPosition = nextToken.previousStartPosition - limit! + 1000;
-      } else {
-        nextToken = {
-          previousStartPosition: previousStartPosition + 1000,
-          previousPrefix: prefix,
-          date: Date.now(),
-        };
-      }
-    }
-
-    if (nextToken) {
-      nextToken = Buffer.from(JSON.stringify(nextToken)).toString("base64");
-    }
-    return {
-      list: list.map((x) => x.QueueUrl),
-      nextToken,
-    };
-  };
   #receiptHandle(MessageId: string) {
     return Buffer.from(randomUUID() + JSON.stringify({ date: Date.now(), MessageId, QueueName: this.QueueName }), "utf-8").toString("base64");
   }

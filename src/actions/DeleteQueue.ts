@@ -1,18 +1,17 @@
 import { SqsCommand } from "./sqsCommand";
-import { Queue } from "../lib/queue";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 
 export class DeleteQueue extends SqsCommand {
   async exec() {
     this.verifyExistingQueue();
 
-    if (!Queue.emulateQueueCreationLifecycle) {
+    if (!this.service.emulateQueueCreationLifecycle) {
       this.foundQueue!.clearRecords();
 
-      const foundIndex = Queue.Queues.findIndex((x) => x.QueueName == this.foundQueue!.QueueName);
+      const foundIndex = this.service.Queues.findIndex((x) => x.QueueName == this.foundQueue!.QueueName);
 
       if (foundIndex != -1) {
-        Queue.Queues.splice(foundIndex, 1);
+        this.service.Queues.splice(foundIndex, 1);
       }
 
       this.res.end(this.#createResponse());
@@ -20,18 +19,18 @@ export class DeleteQueue extends SqsCommand {
     }
 
     const cb = () => {
-      const foundIndex = Queue.Queues.findIndex((x) => x.QueueName == this.foundQueue!.QueueName);
+      const foundIndex = this.service.Queues.findIndex((x) => x.QueueName == this.foundQueue!.QueueName);
 
       if (foundIndex != -1) {
-        Queue.Queues.splice(foundIndex, 1);
+        this.service.Queues.splice(foundIndex, 1);
       }
 
-      Queue.deletingQueues.delete(this.foundQueue!.QueueName);
+      this.service.deletingQueues.delete(this.foundQueue!.QueueName);
     };
 
     this.foundQueue!.purge(cb);
 
-    Queue.deletingQueues.add(this.foundQueue!.QueueName);
+    this.service.deletingQueues.add(this.foundQueue!.QueueName);
 
     this.res.end(this.#createResponse());
   }

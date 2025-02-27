@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
 import type { IncomingMessage } from "http";
 import { AWS_ACTION_TYPE, AWS_JSON_TYPE, AWS_TRACE_ID } from "../common/constants";
-import { Queue } from "../lib/queue";
 import { decode } from "aws-query-decoder";
+import type { SqsService } from "../lib/sqsService";
 
 const parseQueueUrl = (reqQueueUrl?: string) => {
   if (!reqQueueUrl) {
@@ -19,7 +19,7 @@ const parseQueueUrl = (reqQueueUrl?: string) => {
   return QueueUrl;
 };
 
-export const parseSqsHttpRequest = async (req: IncomingMessage) => {
+export const parseSqsHttpRequest = async (req: IncomingMessage, service: SqsService) => {
   let data: Buffer;
   const RequestId = randomUUID();
   const isJsonProtocol = req.headers["content-type"] == AWS_JSON_TYPE;
@@ -52,7 +52,7 @@ export const parseSqsHttpRequest = async (req: IncomingMessage) => {
   }
 
   QueueUrl = parseQueueUrl(body.QueueUrl);
-  const foundQueue = Queue.Queues.find((x) => x.QueueName == QueueUrl);
+  const foundQueue = service.Queues.find((x) => x.QueueName == QueueUrl);
 
   return {
     isJsonProtocol,

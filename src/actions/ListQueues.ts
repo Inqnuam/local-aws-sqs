@@ -1,10 +1,9 @@
 import { SqsCommand } from "./sqsCommand";
-import { Queue } from "../lib/queue";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 
 export class ListQueues extends SqsCommand {
   async exec() {
-    const { list, nextToken } = Queue.listQueues({ limit: Number(this.reqBody.MaxResults), prefix: this.reqBody.QueueNamePrefix, token: this.reqBody.NextToken });
+    const { list, nextToken } = this.service.listQueues({ limit: Number(this.reqBody.MaxResults), prefix: this.reqBody.QueueNamePrefix, token: this.reqBody.NextToken });
 
     this.res.end(this.#createResponse(list, nextToken));
   }

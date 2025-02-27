@@ -1,6 +1,6 @@
 import { SqsCommand } from "./sqsCommand";
 import { type IQueueConfig } from "../lib/queue";
-import { InvalidAttributeNameException, MissingParameterException, UnexcpectedList, UnexcpectedObject, throwOnNoPrimitiveType } from "../common/errors";
+import { InvalidAttributeNameException, MissingParameterException, UnexcpectedList, throwOnNoPrimitiveType } from "../common/errors";
 import { isJsObject } from "../common/utils";
 import { setAttributes } from "../lib/setAttributes";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
@@ -58,7 +58,7 @@ export class SetQueueAttributes extends SqsCommand {
       FifoQueue: q.FifoQueue,
       FifoThroughputLimit: q.FifoThroughputLimit,
     };
-    setAttributes(currentAttribs, this.body.Attributes, false);
+    setAttributes(currentAttribs, this.body.Attributes, this.service, false);
 
     const updatedAttribs: any = {};
 

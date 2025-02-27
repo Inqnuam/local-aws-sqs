@@ -2,6 +2,7 @@ import { FIFO_QUEUE_NAME_PATTERN, QUEUE_NAME_PATTERN, TAG_KEY_PATTERN, TAG_KEY_E
 import { InvalidParameterValueException, QueueDeletedRecentlyException, QueueNameExistsException } from "../common/errors";
 import { Queue, type IQueueConfig } from "./queue";
 import { setAttributes } from "./setAttributes";
+import type { SqsService } from "./sqsService";
 
 interface IAmzQueryBody {
   QueueName: string;
@@ -9,7 +10,7 @@ interface IAmzQueryBody {
   Tag?: { Key: string; Value: string }[];
 }
 
-const parseJsonBody = (body: any) => {
+const parseJsonBody = (body: any, service: SqsService) => {
   const { QueueName, Attributes, tags } = body;
 
   const config: IQueueConfig = {
@@ -28,7 +29,7 @@ const parseJsonBody = (body: any) => {
   config.QueueName = QueueName;
 
   if (Attributes) {
-    setAttributes(config, Attributes);
+    setAttributes(config, Attributes, service);
   }
 
   if (tags) {
@@ -41,7 +42,7 @@ const parseJsonBody = (body: any) => {
   return config;
 };
 
-const parseAmzQueryBody = (body: any) => {
+const parseAmzQueryBody = (body: any, service: SqsService) => {
   const { QueueName, Attribute, Tag } = body as IAmzQueryBody;
 
   const config: IQueueConfig = {
@@ -64,7 +65,7 @@ const parseAmzQueryBody = (body: any) => {
     for (const { Name, Value } of Attribute) {
       Attributes[Name] = Value;
     }
-    setAttributes(config, Attributes);
+    setAttributes(config, Attributes, service);
   }
 
   if (Array.isArray(Tag)) {
@@ -80,11 +81,11 @@ const parseAmzQueryBody = (body: any) => {
   return config;
 };
 
-const parseCreateQueueBody = (body: any, isJsonProtocol: boolean) => {
+const parseCreateQueueBody = (body: any, service: SqsService, isJsonProtocol: boolean) => {
   if (isJsonProtocol) {
-    return parseJsonBody(body);
+    return parseJsonBody(body, service);
   }
-  return parseAmzQueryBody(body);
+  return parseAmzQueryBody(body, service);
 };
 
 const compareQueueAttributes = (oldQueue: Queue, newQueue: Queue) => {
@@ -146,10 +147,10 @@ const compareQueueAttributes = (oldQueue: Queue, newQueue: Queue) => {
   }
 };
 
-export const createQueue = (body: any, isJsonProtocol: boolean) => {
-  const queueConfig = parseCreateQueueBody(body, isJsonProtocol);
+export const createQueue = (body: any, isJsonProtocol: boolean, service: SqsService) => {
+  const queueConfig = parseCreateQueueBody(body, service, isJsonProtocol);
 
-  const queue = new Queue(queueConfig);
+  const queue = new Queue(queueConfig, service);
 
   if (!queue.FifoQueue && !QUEUE_NAME_PATTERN.test(queue.QueueName)) {
     throw new InvalidParameterValueException("Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
@@ -161,22 +162,22 @@ export const createQueue = (body: any, isJsonProtocol: boolean) => {
     );
   }
 
-  if (Queue.deletingQueues.has(queue.QueueName)) {
+  if (service.deletingQueues.has(queue.QueueName)) {
     throw QueueDeletedRecentlyException;
   }
 
-  const foundQueue = Queue.Queues.find((x) => x.QueueName == queue.QueueName);
+  const foundQueue = service.Queues.find((x) => x.QueueName == queue.QueueName);
   if (foundQueue) {
     compareQueueAttributes(foundQueue, queue);
     return foundQueue.QueueUrl;
   }
 
-  if (Queue.emulateLazyQueues) {
+  if (service.emulateLazyQueues) {
     setTimeout(() => {
-      Queue.Queues.push(queue);
+      service.Queues.push(queue);
     }, 1150);
   } else {
-    Queue.Queues.push(queue);
+    service.Queues.push(queue);
   }
 
   return queue.QueueUrl;

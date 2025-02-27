@@ -3,9 +3,16 @@ import { createRequestHandler, type ISqsServerOptions } from "./parsers/requestH
 
 export const createSqsServer = (options: ISqsServerOptions): Promise<Server> => {
   return new Promise((resolve) => {
-    const server = createServer(createRequestHandler(options));
+    const { requestHandler, service } = createRequestHandler(options);
+    const server = createServer(requestHandler);
 
     const resolver = async () => {
+      const address = server.address();
+
+      if (address && typeof address == "object") {
+        service.PORT = address.port;
+      }
+
       resolve(server);
     };
 

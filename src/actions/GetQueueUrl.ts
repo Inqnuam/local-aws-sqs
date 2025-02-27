@@ -1,5 +1,4 @@
 import { SqsCommand } from "./sqsCommand";
-import { Queue } from "../lib/queue";
 import { InvalidParameterValueException, SqsError } from "../common/errors";
 import { ResponseMetadata, xmlVersion, xmlns } from "../common/responses";
 
@@ -11,8 +10,8 @@ export class GetQueueUrl extends SqsCommand {
       throw new InvalidParameterValueException("Value for parameter QueueName is invalid. Reason: Must specify a queue name.");
     }
 
-    const foundQueue = Queue.Queues.find((x) => x.QueueName == QueueName);
-    if (!foundQueue || Queue.deletingQueues.has(foundQueue.QueueName)) {
+    const foundQueue = this.service.Queues.find((x) => x.QueueName == QueueName);
+    if (!foundQueue || this.service.deletingQueues.has(foundQueue.QueueName)) {
       throw new SqsError({
         Code: "AWS.SimpleQueueService.NonExistentQueue",
         Type: "com.amazonaws.sqs#QueueDoesNotExist",

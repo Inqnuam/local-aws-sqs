@@ -4,7 +4,7 @@ import { createQueue } from "../lib/createQueue";
 
 export class CreateQueue extends SqsCommand {
   async exec() {
-    const QueueUrl = createQueue(this.reqBody, this.isJsonProtocol);
+    const QueueUrl = createQueue(this.reqBody, this.isJsonProtocol, this.service);
 
     this.res.end(this.#createResponse(QueueUrl));
   }
