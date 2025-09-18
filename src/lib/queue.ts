@@ -451,12 +451,14 @@ export class Queue implements IQueueConfig {
     let foundMsg: any = undefined;
 
     if (input.MessageGroupId) {
-      foundMsg = this.#findDuplicatedMsg(input.MessageGroupId, input.MessageDeduplicationId);
+      if (this.FifoQueue) {
+        foundMsg = this.#findDuplicatedMsg(input.MessageGroupId, input.MessageDeduplicationId);
 
-      if (foundMsg) {
-        SequenceNumber = foundMsg.record.attributes.SequenceNumber;
-      } else {
-        SequenceNumber = this.#createSeqNumber(input.MessageGroupId);
+        if (foundMsg) {
+          SequenceNumber = foundMsg.record.attributes.SequenceNumber;
+        } else {
+          SequenceNumber = this.#createSeqNumber(input.MessageGroupId);
+        }
       }
     }
 
@@ -941,6 +943,9 @@ export class Queue implements IQueueConfig {
 
     if (MessageGroupId) {
       record.attributes.MessageGroupId = MessageGroupId;
+    }
+
+    if (MessageDeduplicationId) {
       record.attributes.MessageDeduplicationId = MessageDeduplicationId;
       record.attributes.SequenceNumber = SequenceNumber;
     }

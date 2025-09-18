@@ -1,15 +1,33 @@
 import type { Queue } from "../lib/queue";
 import { verifyQueueAttribValue } from "../common/utils";
 import { verifyMessageAttributes } from "./verifyMessageAttributes";
+import { ALPHANUM_PUNCT_PATTERN } from "../common/constants";
 
 export const verifyStandartQueueBatchMsgEntry = (msg: any, i: number, queue: Queue) => {
-  if ("MessageDeduplicationId" in msg || "MessageGroupId" in msg) {
+  if ("MessageDeduplicationId" in msg) {
     return {
       Code: "InvalidParameterValue",
       Id: msg.Id,
       Message: "The request include parameter that is not valid for this queue type",
       SenderFault: "true",
     };
+  }
+
+  if ("MessageGroupId" in msg) {
+    const err = {
+      Code: "InvalidParameterValue",
+      Id: msg.Id,
+      Message: "MessageGroupId can only include alphanumeric and punctuation characters. 1 to 128 in length",
+      SenderFault: "true",
+    };
+
+    if (typeof msg.MessageGroupId != "string") {
+      return err;
+    }
+
+    if (!ALPHANUM_PUNCT_PATTERN.test(msg.MessageGroupId)) {
+      return err;
+    }
   }
 
   if (!msg.MessageBody) {

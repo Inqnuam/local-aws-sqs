@@ -263,7 +263,7 @@ describe("Send Message Batch", () => {
       ]);
     });
 
-    it("[Standart Queue] with MessageGroupId", async () => {
+    it("[Standart Queue] with invalid MessageGroupId", async () => {
       const res = await client.send(
         new SendMessageBatchCommand({
           QueueUrl: StandartQueueName,
@@ -271,7 +271,7 @@ describe("Send Message Batch", () => {
             {
               Id: "1",
               MessageBody: "some message",
-              MessageGroupId: "id-1",
+              MessageGroupId: " ",
             },
           ],
         })
@@ -281,7 +281,7 @@ describe("Send Message Batch", () => {
         {
           Code: "InvalidParameterValue",
           Id: "1",
-          Message: "The request include parameter that is not valid for this queue type",
+          Message: "MessageGroupId can only include alphanumeric and punctuation characters. 1 to 128 in length",
           SenderFault: true,
         },
       ]);
@@ -549,6 +549,38 @@ describe("Send Message Batch", () => {
   });
 
   describe("Should pass", () => {
+    it("[Standart Queue] with MessageGroupId", async () => {
+      const res = await client.send(
+        new SendMessageBatchCommand({
+          QueueUrl: StandartQueueName,
+          Entries: [
+            {
+              Id: "1",
+              MessageBody: "some message",
+            },
+            {
+              Id: "2",
+              MessageBody: "some message 2",
+              MessageGroupId: "group-1",
+            },
+          ],
+        })
+      );
+
+      expect(res.Failed).toBeUndefined();
+      expect(res.Successful!.length).toBe(2);
+
+      const [msg1, msg2] = res.Successful!;
+
+      expect(msg1.Id).toBe("1");
+      expect(typeof msg1.MessageId).toBe("string");
+      expect(msg1.MD5OfMessageBody).toBe("df49b60423903e095b80d9b4a92eb065");
+
+      expect(msg2.Id).toBe("2");
+      expect(typeof msg2.MessageId).toBe("string");
+      expect(msg2.MD5OfMessageBody).toBe("36e8a424130490596fc507dba99d2ace");
+    });
+
     it("[Standart Queue] without Attributes", async () => {
       const res = await client.send(
         new SendMessageBatchCommand({

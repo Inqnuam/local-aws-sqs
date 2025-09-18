@@ -56,8 +56,18 @@ export class SendMessage extends SqsCommand {
         throw new InvalidParameterValueException("The request include parameter MessageDeduplicationId which is not valid for this queue type");
       }
 
-      if (msg.MessageGroupId) {
-        throw new InvalidParameterValueException("The request include parameter MessageGroupId which is not valid for this queue type");
+      if ("MessageGroupId" in msg) {
+        if (typeof msg.MessageGroupId != "string") {
+          throw new InvalidParameterValueException(
+            `Value ${msg.MessageGroupId} for parameter MessageGroupId is invalid. Reason: MessageGroupId can only include alphanumeric and punctuation characters. 1 to 128 in length.`
+          );
+        }
+
+        if (!ALPHANUM_PUNCT_PATTERN.test(msg.MessageGroupId)) {
+          throw new InvalidParameterValueException(
+            `Value ${msg.MessageGroupId} for parameter MessageGroupId is invalid. Reason: MessageGroupId can only include alphanumeric and punctuation characters. 1 to 128 in length.`
+          );
+        }
       }
     }
 

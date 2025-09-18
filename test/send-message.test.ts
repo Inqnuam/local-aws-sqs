@@ -60,10 +60,6 @@ describe("Send Message", () => {
 
       it("with invalid attributes", async () => {
         await expect(async () => {
-          await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageGroupId: "23432" }));
-        }).rejects.toThrow("The request include parameter MessageGroupId which is not valid for this queue type");
-
-        await expect(async () => {
           await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageDeduplicationId: "1000" }));
         }).rejects.toThrow("The request include parameter MessageDeduplicationId which is not valid for this queue type");
       });
@@ -369,6 +365,12 @@ describe("Send Message", () => {
       expect(res.MD5OfMessageBody).toBe("d1d4180b7e411c4be86b00fb2ee103eb");
       expect(res.MD5OfMessageSystemAttributes).toBe("fdce4f2818803f2f73becc09a54792c0");
       expect(typeof res.MessageId).toBe("string");
+      expect(res.MessageId!.length).toBeGreaterThan(10);
+    });
+
+    it("should pass with Fair Queue", async () => {
+      const res = await client.send(new SendMessageCommand({ QueueUrl: StandartQueueName, MessageBody: "Test message", MessageGroupId: "23432" }));
+
       expect(res.MessageId!.length).toBeGreaterThan(10);
     });
 
