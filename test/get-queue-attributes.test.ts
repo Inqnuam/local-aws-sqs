@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 
 const { cli, client, server } = await createServerAndCli();
 
-const attribs = { MaximumMessageSize: "262144", VisibilityTimeout: "30" };
+const attribs = { MaximumMessageSize: "1048576", VisibilityTimeout: "30" };
 
 describe("Get Queue Attributes", () => {
   afterAll(() => {

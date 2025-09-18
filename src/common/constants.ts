@@ -64,7 +64,7 @@ export const MAX_KmsDataKeyReusePeriodSeconds = 86400;
 
 export const MAX_sourceQueueArns = 10;
 
-export const kMaximumMessageSize = 262144;
+export const kMaximumMessageSize = 1048576;
 
 export const MIN_MessageRetentionPeriod = 60;
 export const kMessageRetentionPeriod = 345600;

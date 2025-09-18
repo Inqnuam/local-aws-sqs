@@ -27,6 +27,7 @@ import {
   VALID_POLICY_STATEMENT_FIELDS,
   VALID_POLICY_VERSIONS,
   VALID_REDRIVE_ALLOW_POLICY_FIELDS,
+  kMaximumMessageSize,
 } from "./constants";
 
 export const md5 = (contents: string | BinaryLike): string => {
@@ -229,7 +230,7 @@ export const verifyQueueAttribValue = {
       }
     }
 
-    if (isNaN(x) || Number(x) < 1024 || Number(x) > 262144) {
+    if (isNaN(x) || Number(x) < 1024 || Number(x) > kMaximumMessageSize) {
       return InvalidMaximumMessageSize;
     }
   },

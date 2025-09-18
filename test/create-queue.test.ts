@@ -234,7 +234,7 @@ describe("Create Queue", () => {
 
         it("with above max allowed value", async () => {
           await expect(async () => {
-            await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "262145" } }));
+            await client.send(new CreateQueueCommand({ QueueName: "InvalidAttribValueQueue", Attributes: { MaximumMessageSize: "1048577" } }));
           }).rejects.toThrow("Invalid value for the parameter MaximumMessageSize.");
         });
 
@@ -252,7 +252,7 @@ describe("Create Queue", () => {
           await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { MaximumMessageSize: null } }));
 
           const res = await client.send(new GetQueueAttributesCommand({ QueueUrl, AttributeNames: ["MaximumMessageSize"] }));
-          expect(res.Attributes!.MaximumMessageSize).toBe("262144");
+          expect(res.Attributes!.MaximumMessageSize).toBe("1048576");
         });
 
         it("with String(Number)", async () => {

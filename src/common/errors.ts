@@ -135,7 +135,7 @@ export class BatchRequestTooLong extends SqsError {
     super({
       Type: "com.amazonaws.sqs#BatchRequestTooLong",
       Code: "AWS.SimpleQueueService.BatchRequestTooLong",
-      Message: `Batch requests cannot be longer than 262144 bytes. You have sent ${totalSize} bytes.`,
+      Message: `Batch requests cannot be longer than 1048576 bytes. You have sent ${totalSize} bytes.`,
     });
   }
 }

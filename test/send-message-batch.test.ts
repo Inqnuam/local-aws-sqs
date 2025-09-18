@@ -393,11 +393,11 @@ describe("Send Message Batch", () => {
               Entries: [
                 {
                   Id: "1",
-                  MessageBody: Array(131072).fill("a").join(""),
+                  MessageBody: Array(524288).fill("a").join(""),
                 },
                 {
                   Id: "2",
-                  MessageBody: Array(131000).fill("b").join(""),
+                  MessageBody: Array(524230).fill("b").join(""),
                 },
                 {
                   Id: "3",
@@ -422,7 +422,7 @@ describe("Send Message Batch", () => {
               ],
             })
           );
-        }).rejects.toThrow("Batch requests cannot be longer than 262144 bytes. You have sent 262189 bytes.");
+        }).rejects.toThrow("Batch requests cannot be longer than 1048576 bytes. You have sent 1048635 bytes.");
       });
       it("[FIFO Queue] total length", async () => {
         await expect(async () => {
@@ -433,12 +433,12 @@ describe("Send Message Batch", () => {
                 {
                   Id: "1",
                   MessageGroupId: "1",
-                  MessageBody: Array(131072).fill("a").join(""),
+                  MessageBody: Array(524288).fill("a").join(""),
                 },
                 {
                   Id: "2",
                   MessageGroupId: "2",
-                  MessageBody: Array(131000).fill("b").join(""),
+                  MessageBody: Array(524230).fill("b").join(""),
                 },
                 {
                   Id: "3",
@@ -465,7 +465,7 @@ describe("Send Message Batch", () => {
               ],
             })
           );
-        }).rejects.toThrow("Batch requests cannot be longer than 262144 bytes. You have sent 262189 bytes.");
+        }).rejects.toThrow("Batch requests cannot be longer than 1048576 bytes. You have sent 1048635 bytes.");
       });
 
       it("[Standart Queue] individual message length", async () => {
