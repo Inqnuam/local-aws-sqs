@@ -7,11 +7,11 @@
   "author": "Inqnuam",
   "license": "MIT",
   "devDependencies": {
-    "@aws-sdk/client-sqs": "^3.891.0",
+    "@aws-sdk/client-sqs": "^3.954.0",
     "@types/node": "^14.14.31",
-    "esbuild": "^0.25.10",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "esbuild": "^0.27.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   },
   "scripts": {
     "test": "vitest --testTimeout 20000",

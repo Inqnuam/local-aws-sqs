@@ -374,42 +374,38 @@ describe("Send Message", () => {
       expect(res.MessageId!.length).toBeGreaterThan(10);
     });
 
-    it(
-      "should pass with SQS expected DelaySeconds behaviour",
-      async () => {
-        const QueueUrl = "DelayedTestQueue";
+    it("should pass with SQS expected DelaySeconds behaviour", { timeout: 20 * 1000 }, async () => {
+      const QueueUrl = "DelayedTestQueue";
 
-        await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { DelaySeconds: "2" } }));
-        await client.send(new SendMessageCommand({ QueueUrl, MessageBody: "Hello world" }));
+      await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { DelaySeconds: "2" } }));
+      await client.send(new SendMessageCommand({ QueueUrl, MessageBody: "Hello world" }));
 
-        const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(NoneMessages).toBeUndefined();
+      const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(NoneMessages).toBeUndefined();
 
-        await sleep(3);
+      await sleep(3);
 
-        const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(Messages).toHaveLength(1);
+      const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(Messages).toHaveLength(1);
 
-        await client.send(new DeleteMessageCommand({ QueueUrl, ReceiptHandle: Messages![0].ReceiptHandle }));
-        const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(NoneMessages2).toBeUndefined();
+      await client.send(new DeleteMessageCommand({ QueueUrl, ReceiptHandle: Messages![0].ReceiptHandle }));
+      const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(NoneMessages2).toBeUndefined();
 
-        const MessageBody = "Hello world from delayed queue";
-        await client.send(new SendMessageCommand({ QueueUrl, MessageBody, DelaySeconds: 5 }));
+      const MessageBody = "Hello world from delayed queue";
+      await client.send(new SendMessageCommand({ QueueUrl, MessageBody, DelaySeconds: 5 }));
 
-        await sleep(3);
-        const { Messages: NoneMessages3 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(NoneMessages3).toBeUndefined();
+      await sleep(3);
+      const { Messages: NoneMessages3 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(NoneMessages3).toBeUndefined();
 
-        await sleep(3); // 3 + 3 exceeds DelaySeconds: 5
+      await sleep(3); // 3 + 3 exceeds DelaySeconds: 5
 
-        const { Messages: Messages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(Messages2).toHaveLength(1);
+      const { Messages: Messages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(Messages2).toHaveLength(1);
 
-        expect(Messages2![0].Body).toBe(MessageBody);
-      },
-      { timeout: 20 * 1000 }
-    );
+      expect(Messages2![0].Body).toBe(MessageBody);
+    });
   });
 
   describe("FIFO Queue", () => {

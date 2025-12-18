@@ -93,34 +93,30 @@ describe("Change Message Visibility", () => {
     expect(res.$metadata.httpStatusCode).toBe(200);
   });
 
-  it(
-    "Should pass with SQS VisibilityTimeout expected behaviour",
-    async () => {
-      const QueueUrl = "VisibilityTestQueue";
+  it("Should pass with SQS VisibilityTimeout expected behaviour", { timeout: 10 * 1000 }, async () => {
+    const QueueUrl = "VisibilityTestQueue";
 
-      await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { VisibilityTimeout: "3" } }));
-      await client.send(new SendMessageCommand({ QueueUrl, MessageBody: "Hello world" }));
+    await client.send(new CreateQueueCommand({ QueueName: QueueUrl, Attributes: { VisibilityTimeout: "3" } }));
+    await client.send(new SendMessageCommand({ QueueUrl, MessageBody: "Hello world" }));
 
-      const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+    const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
 
-      expect(Messages).toHaveLength(1);
+    expect(Messages).toHaveLength(1);
 
-      const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-      expect(NoneMessages).toBeUndefined();
+    const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+    expect(NoneMessages).toBeUndefined();
 
-      await sleep(3);
+    await sleep(3);
 
-      const { Messages: backedMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-      expect(backedMessages).toHaveLength(1);
+    const { Messages: backedMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+    expect(backedMessages).toHaveLength(1);
 
-      const [msg] = backedMessages!;
+    const [msg] = backedMessages!;
 
-      await client.send(new ChangeMessageVisibilityCommand({ QueueUrl, ReceiptHandle: msg.ReceiptHandle, VisibilityTimeout: 10 }));
-      await sleep(5);
+    await client.send(new ChangeMessageVisibilityCommand({ QueueUrl, ReceiptHandle: msg.ReceiptHandle, VisibilityTimeout: 10 }));
+    await sleep(5);
 
-      const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-      expect(NoneMessages2).toBeUndefined();
-    },
-    { timeout: 10 * 1000 }
-  );
+    const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+    expect(NoneMessages2).toBeUndefined();
+  });
 });

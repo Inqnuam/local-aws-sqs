@@ -156,53 +156,45 @@ describe("Receive Message", () => {
       expect(typeof msg.ReceiptHandle).toBe("string");
     });
 
-    it(
-      "with SQS WaitTimeSeconds behaviour",
-      async () => {
-        const QueueUrl = "WaitTimeSecondsQueue";
-        const MessageBody = "Message sent later";
-        const WaitTimeSeconds = 5;
+    it("with SQS WaitTimeSeconds behaviour", { timeout: 10 * 1000 }, async () => {
+      const QueueUrl = "WaitTimeSecondsQueue";
+      const MessageBody = "Message sent later";
+      const WaitTimeSeconds = 5;
 
-        await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
+      await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
 
-        setTimeout(async () => {
-          await client.send(new SendMessageCommand({ QueueUrl, MessageBody }));
-        }, 3 * 1000);
-
-        const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
-        expect(NoneMessages).toBeUndefined();
-
-        const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds: 1 }));
-        expect(NoneMessages2).toBeUndefined();
-
-        const beforeReq = Date.now() / 1000;
-        const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds, MaxNumberOfMessages: 2 }));
-        const afterReq = Date.now() / 1000;
-
-        const spentTime = afterReq - beforeReq;
-        expect(spentTime).toBeGreaterThan(WaitTimeSeconds);
-
-        expect(Messages).toHaveLength(1);
-        expect(Messages![0].Body).toBe(MessageBody);
-      },
-      { timeout: 10 * 1000 }
-    );
-
-    it(
-      "with SQS WaitTimeSeconds + VisibilityTimeout behaviour",
-      async () => {
-        const QueueUrl = "WaitTimeSecondsVisibilityTimeoutQueue";
-        const MessageBody = "Message with 0 Visibility";
-
-        await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
+      setTimeout(async () => {
         await client.send(new SendMessageCommand({ QueueUrl, MessageBody }));
+      }, 3 * 1000);
 
-        const { Messages } = await client.send(
-          // @ts-ignore
-          new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds: 0, VisibilityTimeout: 0, MaxNumberOfMessages: 10, AttributeNames: ["ApproximateReceiveCount"] })
-        );
-      },
-      { timeout: 10 * 1000 }
-    );
+      const { Messages: NoneMessages } = await client.send(new ReceiveMessageCommand({ QueueUrl }));
+      expect(NoneMessages).toBeUndefined();
+
+      const { Messages: NoneMessages2 } = await client.send(new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds: 1 }));
+      expect(NoneMessages2).toBeUndefined();
+
+      const beforeReq = Date.now() / 1000;
+      const { Messages } = await client.send(new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds, MaxNumberOfMessages: 2 }));
+      const afterReq = Date.now() / 1000;
+
+      const spentTime = afterReq - beforeReq;
+      expect(spentTime).toBeGreaterThan(WaitTimeSeconds);
+
+      expect(Messages).toHaveLength(1);
+      expect(Messages![0].Body).toBe(MessageBody);
+    });
+
+    it("with SQS WaitTimeSeconds + VisibilityTimeout behaviour", { timeout: 10 * 1000 }, async () => {
+      const QueueUrl = "WaitTimeSecondsVisibilityTimeoutQueue";
+      const MessageBody = "Message with 0 Visibility";
+
+      await client.send(new CreateQueueCommand({ QueueName: QueueUrl }));
+      await client.send(new SendMessageCommand({ QueueUrl, MessageBody }));
+
+      const { Messages } = await client.send(
+        // @ts-ignore
+        new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds: 0, VisibilityTimeout: 0, MaxNumberOfMessages: 10, AttributeNames: ["ApproximateReceiveCount"] })
+      );
+    });
   });
 });

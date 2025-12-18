@@ -203,210 +203,194 @@ describe("MessageMoveTask", () => {
       expect(TaskHandle.sourceArn).toBe(SourceArn);
     });
 
-    it(
-      "by moving messages back to default Destiantion",
-      async () => {
-        const SourceQueueName = "PASSStartMessageMoveTask_SourceArn2";
-        const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
+    it("by moving messages back to default Destiantion", { timeout: 20 * 1000 }, async () => {
+      const SourceQueueName = "PASSStartMessageMoveTask_SourceArn2";
+      const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
 
-        const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn2";
-        const DestinationArn = `arn:aws:sqs:eu-west-3:123456789012:${DestinationQueueName}`;
+      const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn2";
+      const DestinationArn = `arn:aws:sqs:eu-west-3:123456789012:${DestinationQueueName}`;
 
-        await client.send(new CreateQueueCommand({ QueueName: SourceQueueName }));
+      await client.send(new CreateQueueCommand({ QueueName: SourceQueueName }));
 
-        await client.send(
-          new CreateQueueCommand({
-            QueueName: DestinationQueueName,
-            Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: SourceArn, maxReceiveCount: 2 }) },
-          })
-        );
+      await client.send(
+        new CreateQueueCommand({
+          QueueName: DestinationQueueName,
+          Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: SourceArn, maxReceiveCount: 2 }) },
+        })
+      );
 
-        await client.send(
-          new SendMessageCommand({
-            QueueUrl: DestinationQueueName,
-            MessageBody: "Hello, World!",
-            MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
-            MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
-          })
-        );
-        await client.send(
-          new ReceiveMessageCommand({
-            QueueUrl: DestinationQueueName,
-            VisibilityTimeout: 0,
-            // @ts-ignore
-            AttributeNames: ["ApproximateReceiveCount"],
-            MaxNumberOfMessages: 10,
-            WaitTimeSeconds: 3,
-          })
-        );
+      await client.send(
+        new SendMessageCommand({
+          QueueUrl: DestinationQueueName,
+          MessageBody: "Hello, World!",
+          MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
+          MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
+        })
+      );
+      await client.send(
+        new ReceiveMessageCommand({
+          QueueUrl: DestinationQueueName,
+          VisibilityTimeout: 0,
+          // @ts-ignore
+          AttributeNames: ["ApproximateReceiveCount"],
+          MaxNumberOfMessages: 10,
+          WaitTimeSeconds: 3,
+        })
+      );
 
-        const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
+      const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
 
-        expect(Attributes?.ApproximateNumberOfMessages).toBe("1");
+      expect(Attributes?.ApproximateNumberOfMessages).toBe("1");
 
-        const res2 = await client.send(
-          new ReceiveMessageCommand({
-            QueueUrl: DestinationQueueName,
-          })
-        );
-        expect(res2.Messages).toBeUndefined();
+      const res2 = await client.send(
+        new ReceiveMessageCommand({
+          QueueUrl: DestinationQueueName,
+        })
+      );
+      expect(res2.Messages).toBeUndefined();
 
-        await client.send(new StartMessageMoveTaskCommand({ SourceArn }));
+      await client.send(new StartMessageMoveTaskCommand({ SourceArn }));
 
-        await sleep(2);
+      await sleep(2);
 
-        const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
-        const { Attributes: destinationAttribs } = await client.send(
-          new GetQueueAttributesCommand({ QueueUrl: DestinationQueueName, AttributeNames: ["ApproximateNumberOfMessages"] })
-        );
+      const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
+      const { Attributes: destinationAttribs } = await client.send(
+        new GetQueueAttributesCommand({ QueueUrl: DestinationQueueName, AttributeNames: ["ApproximateNumberOfMessages"] })
+      );
 
-        expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("0");
-        expect(destinationAttribs?.ApproximateNumberOfMessages).toBe("1");
-      },
-      { timeout: 20 * 1000 }
-    );
+      expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("0");
+      expect(destinationAttribs?.ApproximateNumberOfMessages).toBe("1");
+    });
 
-    it(
-      "by moving messages to a custom Destiantion",
-      async () => {
-        const SourceQueueName = "PASSStartMessageMoveTask_SourceArn3";
-        const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
+    it("by moving messages to a custom Destiantion", { timeout: 20 * 1000 }, async () => {
+      const SourceQueueName = "PASSStartMessageMoveTask_SourceArn3";
+      const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
 
-        const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn3";
-        const DestinationArn = `arn:aws:sqs:eu-west-3:123456789012:${DestinationQueueName}`;
+      const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn3";
+      const DestinationArn = `arn:aws:sqs:eu-west-3:123456789012:${DestinationQueueName}`;
 
-        await client.send(
-          new CreateQueueCommand({
-            QueueName: DestinationQueueName,
-          })
-        );
+      await client.send(
+        new CreateQueueCommand({
+          QueueName: DestinationQueueName,
+        })
+      );
 
-        await client.send(
-          new CreateQueueCommand({ QueueName: SourceQueueName, Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: DestinationArn, maxReceiveCount: 2 }) } })
-        );
+      await client.send(
+        new CreateQueueCommand({ QueueName: SourceQueueName, Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: DestinationArn, maxReceiveCount: 2 }) } })
+      );
 
-        await client.send(
-          new SendMessageCommand({
-            QueueUrl: DestinationQueueName,
-            MessageBody: "Hello, World!",
-            MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
-            MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
-          })
-        );
+      await client.send(
+        new SendMessageCommand({
+          QueueUrl: DestinationQueueName,
+          MessageBody: "Hello, World!",
+          MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
+          MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
+        })
+      );
 
-        const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
+      const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
 
-        expect(Attributes?.ApproximateNumberOfMessages).toBe("0");
+      expect(Attributes?.ApproximateNumberOfMessages).toBe("0");
 
-        await client.send(new StartMessageMoveTaskCommand({ SourceArn: DestinationArn, DestinationArn: SourceArn }));
+      await client.send(new StartMessageMoveTaskCommand({ SourceArn: DestinationArn, DestinationArn: SourceArn }));
 
-        await sleep(2);
+      await sleep(2);
 
-        const { Attributes: destinationAttribs } = await client.send(
-          new GetQueueAttributesCommand({ QueueUrl: DestinationQueueName, AttributeNames: ["ApproximateNumberOfMessages"] })
-        );
-        expect(destinationAttribs?.ApproximateNumberOfMessages).toBe("0");
+      const { Attributes: destinationAttribs } = await client.send(
+        new GetQueueAttributesCommand({ QueueUrl: DestinationQueueName, AttributeNames: ["ApproximateNumberOfMessages"] })
+      );
+      expect(destinationAttribs?.ApproximateNumberOfMessages).toBe("0");
 
-        const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
-        expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("1");
-      },
-      { timeout: 20 * 1000 }
-    );
+      const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
+      expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("1");
+    });
 
-    it(
-      "with failure (CouldNotDetermineMessageSource)",
-      async () => {
-        const SourceQueueName = "PASSStartMessageMoveTask_SourceArn4";
-        const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
+    it("with failure (CouldNotDetermineMessageSource)", { timeout: 20 * 1000 }, async () => {
+      const SourceQueueName = "PASSStartMessageMoveTask_SourceArn4";
+      const SourceArn = `arn:aws:sqs:eu-west-3:123456789012:${SourceQueueName}`;
 
-        const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn4";
+      const DestinationQueueName = "PASSStartMessageMoveTask_DestinationArn4";
 
-        await client.send(
-          new CreateQueueCommand({
-            QueueName: SourceQueueName,
-          })
-        );
+      await client.send(
+        new CreateQueueCommand({
+          QueueName: SourceQueueName,
+        })
+      );
 
-        await client.send(
-          new CreateQueueCommand({ QueueName: DestinationQueueName, Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: SourceArn, maxReceiveCount: 2 }) } })
-        );
+      await client.send(
+        new CreateQueueCommand({ QueueName: DestinationQueueName, Attributes: { RedrivePolicy: JSON.stringify({ deadLetterTargetArn: SourceArn, maxReceiveCount: 2 }) } })
+      );
 
-        await client.send(
-          new SendMessageCommand({
-            QueueUrl: SourceQueueName,
-            MessageBody: "Hello, World!",
-            MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
-            MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
-          })
-        );
-        await sleep(1);
-        const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
+      await client.send(
+        new SendMessageCommand({
+          QueueUrl: SourceQueueName,
+          MessageBody: "Hello, World!",
+          MessageAttributes: { Hello: { DataType: "String", StringValue: "World!" } },
+          MessageSystemAttributes: { AWSTraceHeader: { DataType: "String", StringValue: "trace-id=1" } },
+        })
+      );
+      await sleep(1);
+      const { Attributes } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["All"] }));
 
-        expect(Attributes?.ApproximateNumberOfMessages).toBe("1");
-        const MaxNumberOfMessagesPerSecond = 93;
-        await client.send(new StartMessageMoveTaskCommand({ SourceArn, MaxNumberOfMessagesPerSecond }));
+      expect(Attributes?.ApproximateNumberOfMessages).toBe("1");
+      const MaxNumberOfMessagesPerSecond = 93;
+      await client.send(new StartMessageMoveTaskCommand({ SourceArn, MaxNumberOfMessagesPerSecond }));
 
-        await sleep(2);
+      await sleep(2);
 
-        const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
-        expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("1");
+      const { Attributes: sourceAttribs } = await client.send(new GetQueueAttributesCommand({ QueueUrl: SourceQueueName, AttributeNames: ["ApproximateNumberOfMessages"] }));
+      expect(sourceAttribs?.ApproximateNumberOfMessages).toBe("1");
 
-        const { Results } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
+      const { Results } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
 
-        expect(Results).toHaveLength(1);
+      expect(Results).toHaveLength(1);
 
-        const [task] = Results!;
+      const [task] = Results!;
 
-        expect(task.ApproximateNumberOfMessagesMoved).toBe(0);
-        expect(task.ApproximateNumberOfMessagesToMove).toBe(1);
-        expect(task.FailureReason).toBe("CouldNotDetermineMessageSource");
-        expect(task.MaxNumberOfMessagesPerSecond).toBe(MaxNumberOfMessagesPerSecond);
-        expect(task.SourceArn).toBe(SourceArn);
-        expect(new Date(task.StartedTimestamp!).getFullYear()).toBe(new Date().getFullYear()); // is valid date timestamp
-        expect(task.Status).toBe("FAILED");
-        expect(task.TaskHandle).toBeUndefined();
-      },
-      { timeout: 20 * 1000 }
-    );
+      expect(task.ApproximateNumberOfMessagesMoved).toBe(0);
+      expect(task.ApproximateNumberOfMessagesToMove).toBe(1);
+      expect(task.FailureReason).toBe("CouldNotDetermineMessageSource");
+      expect(task.MaxNumberOfMessagesPerSecond).toBe(MaxNumberOfMessagesPerSecond);
+      expect(task.SourceArn).toBe(SourceArn);
+      expect(new Date(task.StartedTimestamp!).getFullYear()).toBe(new Date().getFullYear()); // is valid date timestamp
+      expect(task.Status).toBe("FAILED");
+      expect(task.TaskHandle).toBeUndefined();
+    });
 
-    it(
-      "start and cancel task",
-      async () => {
-        const Entries: { Id: string; MessageBody: string }[] = [];
+    it("start and cancel task", { timeout: 10 * 1000 }, async () => {
+      const Entries: { Id: string; MessageBody: string }[] = [];
 
-        let i = 1;
+      let i = 1;
 
-        while (i < 11) {
-          Entries.push({ Id: `id-${i}`, MessageBody: `message ${i}` });
-          i++;
-        }
+      while (i < 11) {
+        Entries.push({ Id: `id-${i}`, MessageBody: `message ${i}` });
+        i++;
+      }
 
-        await client.send(new SendMessageBatchCommand({ QueueUrl: SourceQueueName, Entries }));
+      await client.send(new SendMessageBatchCommand({ QueueUrl: SourceQueueName, Entries }));
 
-        const { TaskHandle } = await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 1 }));
+      const { TaskHandle } = await client.send(new StartMessageMoveTaskCommand({ SourceArn, DestinationArn, MaxNumberOfMessagesPerSecond: 1 }));
 
-        await sleep(3);
+      await sleep(3);
 
-        const { ApproximateNumberOfMessagesMoved } = await client.send(new CancelMessageMoveTaskCommand({ TaskHandle }));
+      const { ApproximateNumberOfMessagesMoved } = await client.send(new CancelMessageMoveTaskCommand({ TaskHandle }));
 
-        expect(ApproximateNumberOfMessagesMoved).greaterThan(1);
+      expect(ApproximateNumberOfMessagesMoved).greaterThan(1);
 
-        const { Results } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
+      const { Results } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
 
-        const [cancellingTask] = Results!;
+      const [cancellingTask] = Results!;
 
-        expect(["CANCELLING", "CANCELLED"]).toContain(cancellingTask.Status);
-        // expect(cancellingTask.Status).toBe("CANCELLING");  depending on CPU speed / event loops we may "lose" this step
-        expect(cancellingTask.SourceArn).toBe(SourceArn);
-        expect(cancellingTask.DestinationArn).toBe(DestinationArn);
-        expect(cancellingTask.ApproximateNumberOfMessagesToMove).toBe(10);
-        await sleep(2);
+      expect(["CANCELLING", "CANCELLED"]).toContain(cancellingTask.Status);
+      // expect(cancellingTask.Status).toBe("CANCELLING");  depending on CPU speed / event loops we may "lose" this step
+      expect(cancellingTask.SourceArn).toBe(SourceArn);
+      expect(cancellingTask.DestinationArn).toBe(DestinationArn);
+      expect(cancellingTask.ApproximateNumberOfMessagesToMove).toBe(10);
+      await sleep(2);
 
-        const { Results: Results2 } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
-        const [cancelledTask] = Results2!;
-        expect(cancelledTask.Status).toBe("CANCELLED");
-      },
-      { timeout: 10 * 1000 }
-    );
+      const { Results: Results2 } = await client.send(new ListMessageMoveTasksCommand({ SourceArn }));
+      const [cancelledTask] = Results2!;
+      expect(cancelledTask.Status).toBe("CANCELLED");
+    });
   });
 });
