@@ -218,3 +218,23 @@ export const throwOnNoPrimitiveType = (param: any) => {
     throw UnexcpectedList;
   }
 };
+
+export function notStringSerializationException(value: any) {
+  if (Array.isArray(value)) {
+    return new MalformedInputException("Start of list found where not expected");
+  }
+
+  if (typeof value == "object") {
+    return new MalformedInputException("Start of structure or map found where not expected.");
+  }
+
+  if (typeof value == "boolean") {
+    return new MalformedInputException(`${String(value).toUpperCase()}_VALUE can not be converted to a String`);
+  }
+
+  if (typeof value == "number") {
+    return new MalformedInputException("NUMBER_VALUE can not be converted to a String");
+  }
+
+  return new MalformedInputException(`Invalid value: ${typeof value} ${value}`);
+}
