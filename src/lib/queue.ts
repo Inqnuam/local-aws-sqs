@@ -424,6 +424,8 @@ export class Queue implements IQueueConfig {
       }
     }, timeout);
 
+    x.tm.unref();
+
     x.tmStart = Date.now();
   }
   #findDuplicatedMsg = (MessageGroupId: string, MessageDeduplicationId: string) => {
@@ -496,11 +498,13 @@ export class Queue implements IQueueConfig {
       record.delayed = false;
 
       this.#delayed--;
-    }, _delay);
+    }, _delay).unref()
 
     record.tmRetention = setTimeout(() => {
       this.#clearRecord(record.record.MessageId);
     }, this.MessageRetentionPeriod * 1000);
+
+    record.tmRetention.unref();
 
     return record;
   };
@@ -514,7 +518,7 @@ export class Queue implements IQueueConfig {
         this.clearRecords();
         cb?.();
         this.purgeInProgress = false;
-      }, 60 * 1000);
+      }, 60 * 1000).unref();
       return true;
     }
   };
@@ -535,6 +539,8 @@ export class Queue implements IQueueConfig {
       clearInterval(interval);
       resolveTimerPromise();
     }, TIME_FOR_SET_INTERVAL_TO_BE_EXECUTED + waitTime * 1000);
+
+    timeout.unref();
 
     interval = setInterval(() => {
       i++;
@@ -560,6 +566,7 @@ export class Queue implements IQueueConfig {
         }
       }
     }, 10);
+    interval.unref();
 
     await resolveTimer;
 

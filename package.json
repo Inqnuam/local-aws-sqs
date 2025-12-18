@@ -1,6 +1,6 @@
 {
   "name": "local-aws-sqs",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "./dist/index.js",
   "repository": "git@github.com:Inqnuam/local-aws-sqs.git",
   "homepage": "https://github.com/Inqnuam/local-aws-sqs",

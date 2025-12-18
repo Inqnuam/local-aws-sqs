@@ -60,6 +60,7 @@ export class MessageMoveTask {
     this.#job = setInterval(async () => {
       await this.#move();
     }, 1000);
+    this.#job.unref();
   }
 
   cancel() {
